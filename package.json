@@ -1,0 +1,42 @@
+{
+    "name": "ph-reg-bgry-mun-city-prov-zip",
+    "version": "0.1.0",
+    "description": "Headless Philippine address lookup library with PSGC hierarchy and ZIP code autofill",
+    "license": "MIT",
+    "type": "module",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.cjs"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "sideEffects": false,
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "typecheck": "tsc --noEmit",
+        "generate:psgc-data": "tsx scripts/fetch-psgc.ts",
+        "generate:zip-data": "tsx scripts/fetch-zip.ts",
+        "generate:merge-data": "tsx scripts/merge-zip-with-psgc.ts"
+    },
+    "devDependencies": {
+        "@types/node": "^25.5.2",
+        "tsup": "^8.0.2",
+        "tsx": "^4.19.2",
+        "typescript": "^5.6.3",
+        "vitest": "^4.1.2"
+    },
+    "dependencies": {
+        "cheerio": "^1.2.0",
+        "xlsx": "^0.18.5"
+    }
+}
