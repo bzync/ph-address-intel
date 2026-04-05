@@ -1,7 +1,20 @@
 {
-    "name": "ph-reg-bgry-mun-city-prov-zip",
+    "name": "@bzync/ph-address-intel",
     "version": "0.1.0",
     "description": "Headless Philippine address lookup library with PSGC hierarchy and ZIP code autofill",
+    "author": {
+        "name": "Rayan Vega Reynaldo",
+        "email": "rayanvegareynaldo@gmail.com",
+        "url": "https://github.com/rvrdev"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/bzync/ph-address-intel.git"
+    },
+    "homepage": "https://ph-address-intel.bzync.com",
+    "bugs": {
+        "url": "https://github.com/bzync/ph-address-intel/issues"
+    },
     "license": "MIT",
     "type": "module",
     "main": "./dist/index.cjs",
