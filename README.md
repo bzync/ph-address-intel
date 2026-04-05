@@ -2,7 +2,7 @@
 
 > Framework-agnostic TypeScript library for Philippine address lookup, ZIP autofill, and hierarchical region → province → municipality → barangay selection.
 
-[![npm version](https://img.shields.io/npm/v/ph-reg-bgry-mun-city-prov-zip)](https://www.npmjs.com/package/ph-reg-bgry-mun-city-prov-zip)
+[![npm version](https://img.shields.io/npm/v/ph-address-intel)](https://www.npmjs.com/package/ph-address-intel)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
@@ -37,15 +37,15 @@
 ## 📦 Installation
 
 ```bash
-npm install ph-reg-bgry-mun-city-prov-zip
+npm install ph-address-intel
 ```
 
 ### Other package managers
 
 ```bash
-yarn add ph-reg-bgry-mun-city-prov-zip
-pnpm add ph-reg-bgry-mun-city-prov-zip
-bun add ph-reg-bgry-mun-city-prov-zip
+yarn add ph-address-intel
+pnpm add ph-address-intel
+bun add ph-address-intel
 ```
 
 ---
@@ -60,7 +60,7 @@ import {
   getMunicipalities,
   getBarangays,
   search,
-} from 'ph-reg-bgry-mun-city-prov-zip'
+} from 'ph-address-intel'
 
 // ZIP autofill
 const result = lookupByZip('4322')
@@ -226,4 +226,4 @@ MIT License © 2026
 ## ⭐ Support
 
 If this helped you, consider starring the repo ⭐  
-https://github.com/rzarviandoe/ph-reg-bgry-mun-city-prov-zip
+https://github.com/rzarviandoe/ph-address-intel
