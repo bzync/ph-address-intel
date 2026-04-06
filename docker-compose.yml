@@ -1,6 +1,6 @@
 services:
   docs:
-    container_name: 'docs'
+    container_name: 'ph-address-intel-docs'
     build:
       context: .
       dockerfile: docs/Dockerfile
