@@ -1,7 +1,8 @@
 services:
   docs:
+    container_name: 'docs'
     build:
-      context: ..
+      context: .
       dockerfile: docs/Dockerfile
     ports:
       - "3000:80"

@@ -2,19 +2,16 @@
 # docker build -f docs/Dockerfile .
 
 # Stage 1: Build
-FROM node:22-alpine AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
-# Install library deps and build docs
-COPY package.json package-lock.json ./
-RUN npm ci
-
-COPY src ./src
-COPY tsconfig.json tsconfig.build.json ./
-
+# Install docs deps
 COPY docs/package.json docs/package-lock.json ./docs/
 RUN cd docs && npm ci
+
+# Copy library source (referenced via vite alias ../src/index.ts)
+COPY src ./src
 
 COPY docs ./docs
 RUN cd docs && npm run build
