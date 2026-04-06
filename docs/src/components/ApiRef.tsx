@@ -83,17 +83,57 @@ const withZip = muns.filter(m => m.zipCodes.length > 0)`,
 // ]`,
   },
   {
+    name: 'getFullPath',
+    signature: 'getFullPath(code: string): FullPath | null',
+    desc: 'Resolve any PSGC code upward through the hierarchy, returning the complete address chain.',
+    params: [{ name: 'code', type: 'string', desc: '9-digit PSGC code at any level — region, province, municipality, or barangay.' }],
+    returns: 'FullPath with region, province, municipality, and barangay fields. Levels below the given code are null. Returns null if the code is not found.',
+    example: `// From a barangay code → full chain
+const path = getFullPath('045645001')
+// {
+//   region:       { code: '040000000', name: 'Region IV-A (CALABARZON)' },
+//   province:     { code: '045600000', name: 'Quezon' },
+//   municipality: { code: '045645000', name: 'Sariaya' },
+//   barangay:     { code: '045645001', name: 'Antipolo' },
+// }
+
+// From a municipality code — barangay is null
+getFullPath('045645000')
+// { region, province, municipality, barangay: null }
+
+// NCR municipality — province is null
+getFullPath('133900000')
+// { region, province: null, municipality, barangay: null }
+
+// Unknown code
+getFullPath('999999999') // → null`,
+    note: 'province is null for NCR municipalities — NCR cities sit directly under the region.',
+  },
+  {
     name: 'search',
-    signature: 'search(query: string): SearchResult[]',
-    desc: 'Case-insensitive substring search across all address levels.',
-    params: [{ name: 'query', type: 'string', desc: 'Search term. Returns [] for empty string.' }],
-    returns: 'Array of SearchResult objects, grouped by type (region → province → municipality → barangay).',
-    example: `const hits = search('San Jose')
-// [
-//   { type: 'municipality', code: '...', name: 'San Jose', ... },
-//   { type: 'barangay',     code: '...', name: 'San Jose', municipalityCode: '...' },
-//   ...
-// ]`,
+    signature: 'search(query: string, options?: SearchOptions): SearchResult[]',
+    desc: 'Case-insensitive substring search across all address levels. Supports fuzzy matching and parent scoping for cascading dropdowns.',
+    params: [
+      { name: 'query', type: 'string', desc: 'Search term. Returns [] for empty string.' },
+      { name: 'options.fuzzy', type: 'boolean', desc: 'Enable Dice bigram fuzzy matching. Results include a score field. Default: false.' },
+      { name: 'options.limit', type: 'number', desc: 'Maximum number of results to return.' },
+      { name: 'options.types', type: "Array<'region' | 'province' | 'municipality' | 'barangay'>", desc: 'Restrict results to specific address levels.' },
+      { name: 'options.parentCode', type: 'string', desc: 'Scope results to children of a given PSGC code (region, province, or municipality). Regions are excluded from results when set.' },
+    ],
+    returns: 'Array of SearchResult objects. Sorted by score descending when fuzzy is true.',
+    example: `// Substring search
+search('Manila')
+
+// Fuzzy with limit
+search('Mandaluyong', { fuzzy: true, limit: 5, types: ['municipality'] })
+
+// Scoped to CALABARZON — useful for cascading dropdowns
+search('San Jose', { types: ['municipality'], parentCode: '040000000' })
+// Only municipalities in CALABARZON named "San Jose"
+
+// Scoped to a specific municipality
+search('Antipolo', { types: ['barangay'], parentCode: '045645000' })
+// Only the Antipolo barangay inside Sariaya`,
   },
 ]
 

@@ -12,9 +12,14 @@ const features = [
     desc: 'Full PSGC hierarchy support: getRegions → getProvinces → getMunicipalities → getBarangays. Plug into any UI framework.',
   },
   {
+    icon: '🔗',
+    title: 'Full Path Resolution',
+    desc: 'Pass any PSGC code to getFullPath() and get the complete address chain — from barangay up to region — in a single call.',
+  },
+  {
     icon: '🔍',
     title: 'Free-Text Search',
-    desc: 'Fuzzy search across all address levels with a single search() call. Returns typed results for regions, provinces, municipalities, and barangays.',
+    desc: 'Fuzzy search across all address levels with optional parent scoping. Pass a parentCode to restrict results to a specific region, province, or municipality.',
   },
   {
     icon: '📦',

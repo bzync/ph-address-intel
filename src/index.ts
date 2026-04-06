@@ -6,6 +6,7 @@ export type {
     ZipLookupResult,
     SearchResult,
     SearchOptions,
+    FullPath,
     ValidationInput,
     ValidationResult,
 } from './types'
@@ -18,6 +19,7 @@ export {
     getProvince,
     getMunicipality,
     getBarangay,
+    getFullPath,
     search,
 } from './lookup'
 export { lookupByZip } from './zip'

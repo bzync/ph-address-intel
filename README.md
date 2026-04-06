@@ -11,7 +11,8 @@
 
 - **ZIP Autofill** — Resolve a 4-digit ZIP code into region, province, municipality, and barangays.
 - **Cascading Selection** — Full PSGC hierarchy: `getRegions → getProvinces → getMunicipalities → getBarangays`
-- **Free-Text Search** — Search across all address levels with optional fuzzy matching.
+- **Full Path Resolution** — Resolve any PSGC code upward through the hierarchy with `getFullPath`.
+- **Free-Text Search** — Search across all address levels with optional fuzzy matching and parent scoping.
 - **Alias Resolution** — Resolve region nicknames and abbreviations (e.g. `"NCR"`, `"CALABARZON"`) to PSGC codes.
 - **Validation** — Verify that address codes exist and form a consistent hierarchy.
 - **Zero Runtime Dependencies** — No API calls. Works offline and at the edge.
@@ -43,6 +44,7 @@ import {
   getProvinces,
   getMunicipalities,
   getBarangays,
+  getFullPath,
   search,
   resolveAlias,
   validate,
@@ -57,8 +59,11 @@ const provinces = getProvinces('040000000')
 const municipalities = getMunicipalities('045600000')
 const barangays = getBarangays('045645000')
 
-// Free-text search
-const hits = search('Sariaya')
+// Full path from any PSGC code
+const path = getFullPath('045645001') // barangay → full chain
+
+// Scoped search (municipalities within CALABARZON only)
+const hits = search('San Jose', { types: ['municipality'], parentCode: '040000000' })
 
 // Alias resolution
 const ncr = resolveAlias('NCR')
@@ -114,9 +119,34 @@ O(1) lookups by PSGC code.
 
 ---
 
+### `getFullPath(code: string): FullPath | null`
+
+Resolves any PSGC code upward through the hierarchy and returns the complete address chain.
+
+```ts
+// From a barangay code
+const path = getFullPath('045645001')
+// → { region, province, municipality, barangay }
+
+// From a municipality code
+const path = getFullPath('045645000')
+// → { region, province, municipality, barangay: null }
+
+// NCR municipality (no province)
+const path = getFullPath('133900000')
+// → { region, province: null, municipality, barangay: null }
+
+// Unknown code
+getFullPath('999999999') // → null
+```
+
+Accepts codes at any level — region, province, municipality, or barangay. Levels below the given code are `null`.
+
+---
+
 ### `search(query: string, options?: SearchOptions): SearchResult[]`
 
-Searches across all address levels. Supports substring matching (default) and fuzzy matching.
+Searches across all address levels. Supports substring matching (default) and fuzzy matching, with optional scoping to a parent region, province, or municipality.
 
 ```ts
 // Substring search
@@ -124,17 +154,24 @@ search('Manila')
 
 // Fuzzy search with options
 search('Mandaluyong', { fuzzy: true, limit: 5, types: ['municipality'] })
+
+// Scoped to a region (useful for cascading dropdowns)
+search('San Jose', { types: ['municipality'], parentCode: '040000000' })
+
+// Scoped to a municipality
+search('Antipolo', { types: ['barangay'], parentCode: '045645000' })
 ```
 
 **`SearchOptions`**
 
-| Option  | Type                                                         | Default | Description                          |
-|---------|--------------------------------------------------------------|---------|--------------------------------------|
-| `fuzzy` | `boolean`                                                    | `false` | Enable Dice's bigram fuzzy matching  |
-| `limit` | `number`                                                     | —       | Max results to return                |
-| `types` | `Array<'region' \| 'province' \| 'municipality' \| 'barangay'>` | all     | Restrict search to specific levels   |
+| Option       | Type                                                             | Default | Description                                          |
+|--------------|------------------------------------------------------------------|---------|------------------------------------------------------|
+| `fuzzy`      | `boolean`                                                        | `false` | Enable Dice's bigram fuzzy matching                  |
+| `limit`      | `number`                                                         | —       | Max results to return                                |
+| `types`      | `Array<'region' \| 'province' \| 'municipality' \| 'barangay'>` | all     | Restrict search to specific levels                   |
+| `parentCode` | `string`                                                         | —       | Scope results to children of a region, province, or municipality |
 
-Results are sorted by score (descending) when `fuzzy: true`.
+Results are sorted by score (descending) when `fuzzy: true`. When `parentCode` is set, regions are excluded from results (the parent context is already known).
 
 ---
 
@@ -214,10 +251,18 @@ interface SearchResult {
   municipalityCode?: string
 }
 
+interface FullPath {
+  region: Region
+  province: Province | null
+  municipality: Municipality | null
+  barangay: Barangay | null
+}
+
 interface SearchOptions {
   fuzzy?: boolean
   limit?: number
   types?: Array<'region' | 'province' | 'municipality' | 'barangay'>
+  parentCode?: string
 }
 
 interface ValidationInput {

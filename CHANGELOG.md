@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2026-04-07
+
+### Added
+- `getFullPath(code)` — resolve any PSGC code (barangay, municipality, province, or region) upward through the hierarchy, returning `{ region, province, municipality, barangay }` in a single call
+- `search()` `parentCode` option — scope results to children of a given PSGC code, enabling accurate cascading dropdown searches without unrelated region cross-contamination
+- `FullPath` interface exported from the package
+- Comprehensive test suite covering all exported functions: O(1) getters, `getFullPath`, scoped and fuzzy `search`, `resolveAlias`, and `validate`
+- Updated documentation site and README with new API entries and type definitions
+
+## [0.1.7] - 2026-04-06
+
+### Changed
+- Documentation fixes
+
 ## [0.1.6] - 2026-04-06
 
 ### Changed
@@ -52,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESM + CJS dual output with full TypeScript type declarations
 - Zero runtime dependencies
 
+[0.1.8]: https://github.com/bzync/ph-address-intel/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/bzync/ph-address-intel/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/bzync/ph-address-intel/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/bzync/ph-address-intel/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/bzync/ph-address-intel/compare/v0.1.3...v0.1.4

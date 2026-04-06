@@ -35,13 +35,28 @@ interface ZipLookupResult {
   barangays: Barangay[]
 }
 
+interface FullPath {
+  region: Region
+  province: Province | null      // null for NCR municipalities
+  municipality: Municipality | null  // null when code is region or province level
+  barangay: Barangay | null      // null when code is not a barangay
+}
+
 interface SearchResult {
   type: 'region' | 'province' | 'municipality' | 'barangay'
   code: string
   name: string
+  score?: number          // present when fuzzy: true
   regionCode?: string
   provinceCode?: string | null
   municipalityCode?: string
+}
+
+interface SearchOptions {
+  fuzzy?: boolean
+  limit?: number
+  types?: Array<'region' | 'province' | 'municipality' | 'barangay'>
+  parentCode?: string   // scope results to children of this PSGC code
 }`
 
 const psgcNote = `// PSGC Code Structure (9 digits)

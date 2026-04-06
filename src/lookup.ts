@@ -9,9 +9,10 @@ import {
     barangayByCode,
     provincesByRegionCode,
     municipalitiesByProvinceCode,
+    municipalitiesByRegionCode,
     barangaysByMunicipalityCode,
 } from './data/index'
-import type { Region, Province, Municipality, Barangay, SearchResult, SearchOptions } from './types'
+import type { Region, Province, Municipality, Barangay, SearchResult, SearchOptions, FullPath } from './types'
 
 // ─── Hierarchical getters ────────────────────────────────────────────────────
 
@@ -49,6 +50,44 @@ export function getBarangay(code: string): Barangay | undefined {
     return barangayByCode.get(code)
 }
 
+// ─── Full path resolution ────────────────────────────────────────────────────
+
+function resolveProvince(m: Municipality): Province | null {
+    return m.provinceCode !== null ? (provinceByCode.get(m.provinceCode) ?? null) : null
+}
+
+export function getFullPath(code: string): FullPath | null {
+    const barangay = barangayByCode.get(code)
+    if (barangay) {
+        const municipality = municipalityByCode.get(barangay.municipalityCode)
+        if (!municipality) return null
+        const region = regionByCode.get(municipality.regionCode)
+        if (!region) return null
+        return { region, province: resolveProvince(municipality), municipality, barangay }
+    }
+
+    const municipality = municipalityByCode.get(code)
+    if (municipality) {
+        const region = regionByCode.get(municipality.regionCode)
+        if (!region) return null
+        return { region, province: resolveProvince(municipality), municipality, barangay: null }
+    }
+
+    const province = provinceByCode.get(code)
+    if (province) {
+        const region = regionByCode.get(province.regionCode)
+        if (!region) return null
+        return { region, province, municipality: null, barangay: null }
+    }
+
+    const region = regionByCode.get(code)
+    if (region) {
+        return { region, province: null, municipality: null, barangay: null }
+    }
+
+    return null
+}
+
 // ─── Fuzzy search helpers ────────────────────────────────────────────────────
 
 /** Dice's bigram coefficient — tolerates typos and partial matches */
@@ -83,100 +122,76 @@ export function search(query: string, options?: SearchOptions): SearchResult[] {
     const q = query.toLowerCase().trim()
     if (!q) return []
 
-    const { fuzzy = false, limit, types } = options ?? {}
+    const { fuzzy = false, limit, types, parentCode } = options ?? {}
     const includeAll = !types || types.length === 0
 
+    // Resolve parentCode to a scoping level once
+    let parentRegionCode: string | undefined
+    let parentProvinceCode: string | undefined
+    let parentMunicipalityCode: string | undefined
+
+    if (parentCode !== undefined) {
+        if (regionByCode.has(parentCode)) parentRegionCode = parentCode
+        else if (provinceByCode.has(parentCode)) parentProvinceCode = parentCode
+        else if (municipalityByCode.has(parentCode)) parentMunicipalityCode = parentCode
+    }
+
+    // Build scoped candidate lists
+    const scopedProvinces: Province[] = parentRegionCode !== undefined
+        ? (provincesByRegionCode.get(parentRegionCode) ?? [])
+        : provinces
+
+    const scopedMunicipalities: Municipality[] = parentMunicipalityCode !== undefined
+        ? []
+        : parentProvinceCode !== undefined
+            ? (municipalitiesByProvinceCode.get(parentProvinceCode) ?? [])
+            : parentRegionCode !== undefined
+                ? (municipalitiesByRegionCode.get(parentRegionCode) ?? [])
+                : municipalities
+
+    const scopedBarangays: Barangay[] = parentMunicipalityCode !== undefined
+        ? (barangaysByMunicipalityCode.get(parentMunicipalityCode) ?? [])
+        : parentCode !== undefined
+            ? scopedMunicipalities.flatMap((m) => barangaysByMunicipalityCode.get(m.code) ?? [])
+            : barangays
+
+    // Regions are never scoped by a child parentCode
+    const scopedRegions: Region[] = parentCode === undefined ? regions : []
+
     const results: SearchResult[] = []
+    const threshold = fuzzy ? FUZZY_THRESHOLD : 1
 
-    if (fuzzy) {
-        if (includeAll || types!.includes('region')) {
-            for (const r of regions) {
-                const score = bigramScore(q, r.name.toLowerCase())
-                if (score >= FUZZY_THRESHOLD) {
-                    results.push({ type: 'region', code: r.code, name: r.name, score })
-                }
-            }
-        }
-        if (includeAll || types!.includes('province')) {
-            for (const p of provinces) {
-                const score = bigramScore(q, p.name.toLowerCase())
-                if (score >= FUZZY_THRESHOLD) {
-                    results.push({ type: 'province', code: p.code, name: p.name, regionCode: p.regionCode, score })
-                }
-            }
-        }
-        if (includeAll || types!.includes('municipality')) {
-            for (const m of municipalities) {
-                const score = bigramScore(q, m.name.toLowerCase())
-                if (score >= FUZZY_THRESHOLD) {
-                    results.push({
-                        type: 'municipality',
-                        code: m.code,
-                        name: m.name,
-                        regionCode: m.regionCode,
-                        provinceCode: m.provinceCode,
-                        score,
-                    })
-                }
-            }
-        }
-        if (includeAll || types!.includes('barangay')) {
-            for (const b of barangays) {
-                const score = bigramScore(q, b.name.toLowerCase())
-                if (score >= FUZZY_THRESHOLD) {
-                    results.push({
-                        type: 'barangay',
-                        code: b.code,
-                        name: b.name,
-                        municipalityCode: b.municipalityCode,
-                        score,
-                    })
-                }
-            }
-        }
+    const score = (name: string): number => {
+        const n = name.toLowerCase()
+        return fuzzy ? bigramScore(q, n) : n.includes(q) ? 1 : 0
+    }
 
-        results.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
-    } else {
-        if (includeAll || types!.includes('region')) {
-            for (const r of regions) {
-                if (r.name.toLowerCase().includes(q)) {
-                    results.push({ type: 'region', code: r.code, name: r.name })
-                }
-            }
-        }
-        if (includeAll || types!.includes('province')) {
-            for (const p of provinces) {
-                if (p.name.toLowerCase().includes(q)) {
-                    results.push({ type: 'province', code: p.code, name: p.name, regionCode: p.regionCode })
-                }
-            }
-        }
-        if (includeAll || types!.includes('municipality')) {
-            for (const m of municipalities) {
-                if (m.name.toLowerCase().includes(q)) {
-                    results.push({
-                        type: 'municipality',
-                        code: m.code,
-                        name: m.name,
-                        regionCode: m.regionCode,
-                        provinceCode: m.provinceCode,
-                    })
-                }
-            }
-        }
-        if (includeAll || types!.includes('barangay')) {
-            for (const b of barangays) {
-                if (b.name.toLowerCase().includes(q)) {
-                    results.push({
-                        type: 'barangay',
-                        code: b.code,
-                        name: b.name,
-                        municipalityCode: b.municipalityCode,
-                    })
-                }
-            }
+    if (includeAll || types!.includes('region')) {
+        for (const r of scopedRegions) {
+            const s = score(r.name)
+            if (s >= threshold) results.push({ type: 'region', code: r.code, name: r.name, ...(fuzzy ? { score: s } : {}) })
         }
     }
+    if (includeAll || types!.includes('province')) {
+        for (const p of scopedProvinces) {
+            const s = score(p.name)
+            if (s >= threshold) results.push({ type: 'province', code: p.code, name: p.name, regionCode: p.regionCode, ...(fuzzy ? { score: s } : {}) })
+        }
+    }
+    if (includeAll || types!.includes('municipality')) {
+        for (const m of scopedMunicipalities) {
+            const s = score(m.name)
+            if (s >= threshold) results.push({ type: 'municipality', code: m.code, name: m.name, regionCode: m.regionCode, provinceCode: m.provinceCode, ...(fuzzy ? { score: s } : {}) })
+        }
+    }
+    if (includeAll || types!.includes('barangay')) {
+        for (const b of scopedBarangays) {
+            const s = score(b.name)
+            if (s >= threshold) results.push({ type: 'barangay', code: b.code, name: b.name, municipalityCode: b.municipalityCode, ...(fuzzy ? { score: s } : {}) })
+        }
+    }
+
+    if (fuzzy) results.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
 
     return limit !== undefined ? results.slice(0, limit) : results
 }

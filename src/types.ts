@@ -32,17 +32,6 @@ export interface ZipLookupResult {
     barangays: Barangay[]
 }
 
-export interface PSGCData {
-    regions: Region[]
-    provinces: Province[]
-    municipalities: Municipality[]
-    barangays: Barangay[]
-}
-
-export interface ZipMap {
-    [zip: string]: string
-}
-
 export interface SearchResult {
     type: 'region' | 'province' | 'municipality' | 'barangay'
     code: string
@@ -57,6 +46,14 @@ export interface SearchOptions {
     fuzzy?: boolean
     limit?: number
     types?: Array<'region' | 'province' | 'municipality' | 'barangay'>
+    parentCode?: string
+}
+
+export interface FullPath {
+    region: Region
+    province: Province | null
+    municipality: Municipality | null
+    barangay: Barangay | null
 }
 
 export interface ValidationInput {
