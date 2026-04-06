@@ -12,5 +12,5 @@ services:
 
 networks:
   proxy_manager_net:
-    name: proxy_manager_net
-    driver: bridge
+    external: true
+
