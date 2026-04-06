@@ -5,5 +5,5 @@ services:
       context: .
       dockerfile: docs/Dockerfile
     ports:
-      - "3000:80"
+      - "8091:80"
     restart: unless-stopped
