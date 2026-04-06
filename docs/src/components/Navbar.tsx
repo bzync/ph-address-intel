@@ -35,7 +35,7 @@ export default function AppNavbar() {
               </a>
             ))}
             <a
-              href="https://github.com/rzarviandoe/ph-reg-bgry-mun-city-prov-zip"
+              href="https://github.com/bzync/ph-address-intel"
               target="_blank"
               rel="noreferrer"
               className="ml-2 inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl border border-divider hover:border-foreground-300 transition-colors text-foreground"
