@@ -16,9 +16,10 @@ const badges = [
 
 export default function Hero() {
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center px-4 pt-14 pb-24 bg-content1">
-      <div className="max-w-3xl w-full text-center space-y-8">
-        <div className="flex flex-wrap justify-center gap-2">
+    <section className="flex flex-col items-center justify-center px-4 pt-16 pb-16 sm:pt-20 sm:pb-24 bg-content1 min-h-[calc(100vh-4rem)]">
+      <div className="max-w-3xl w-full text-center space-y-6 sm:space-y-8">
+        {/* Badges */}
+        <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2">
           {badges.map((label) => (
             <Chip key={label} size="sm" variant="secondary">
               {label}
@@ -26,14 +27,15 @@ export default function Hero() {
           ))}
         </div>
 
-        <div className="space-y-4">
-          <h1 className="text-5xl sm:text-6xl font-extrabold text-foreground leading-tight tracking-tight">
+        {/* Heading + description */}
+        <div className="space-y-3 sm:space-y-4">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight">
             Philippine Address{' '}
             <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">
               Lookup Library
             </span>
           </h1>
-          <p className="text-lg text-foreground-500 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg text-foreground-500 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
             Framework-agnostic TypeScript library for ZIP code autofill, full-text search,
             alias resolution, and address validation across the hierarchical
             region&nbsp;→&nbsp;province&nbsp;→&nbsp;municipality&nbsp;→&nbsp;barangay
@@ -42,11 +44,13 @@ export default function Hero() {
           </p>
         </div>
 
-        <div className="max-w-md mx-auto">
+        {/* Install snippet */}
+        <div className="w-full max-w-sm sm:max-w-md mx-auto">
           <CodeBlock code={installSnippet} language="bash" />
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
+        {/* CTAs */}
+        <div className="flex flex-col sm:flex-row justify-center gap-3">
           <a
             href="#demo"
             className="inline-flex items-center justify-center px-6 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
@@ -61,7 +65,8 @@ export default function Hero() {
           </a>
         </div>
 
-        <div className="pt-8 flex justify-center animate-bounce">
+        {/* Scroll hint */}
+        <div className="pt-4 sm:pt-8 flex justify-center animate-bounce">
           <svg
             className="w-5 h-5 text-foreground-300"
             viewBox="0 0 24 24"

@@ -23,11 +23,11 @@ export default function ZipDemo() {
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-3 items-end">
+      <div className="flex flex-wrap gap-3 items-end">
         <TextField
           value={zip}
           onChange={lookup}
-          className="max-w-[180px]"
+          className="w-full max-w-[200px]"
         >
           <Label className="text-sm text-foreground-500">Philippine ZIP Code</Label>
           <Input

@@ -58,10 +58,10 @@ const psgcNote = `// PSGC Code Structure (9 digits)
 
 export default function TypesSection() {
   return (
-    <section id="types" className="py-24 px-4 bg-background">
+    <section id="types" className="py-16 sm:py-24 px-4 bg-background">
       <div className="max-w-4xl mx-auto space-y-10">
         <div>
-          <h2 className="text-3xl font-bold text-foreground">TypeScript Types</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">TypeScript Types</h2>
           <p className="mt-3 text-foreground-500 text-lg">
             All types are exported and can be used directly in your application.
           </p>

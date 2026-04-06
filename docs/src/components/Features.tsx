@@ -35,10 +35,10 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-24 px-4 bg-background">
+    <section className="py-16 sm:py-24 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl font-bold text-foreground">Everything you need</h2>
+        <div className="text-center mb-8 sm:mb-14">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Everything you need</h2>
           <p className="mt-3 text-foreground-500 text-lg max-w-xl mx-auto">
             A complete address solution for any Philippine web or mobile application.
           </p>

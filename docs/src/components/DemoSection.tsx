@@ -48,9 +48,9 @@ export default function DemoSection() {
   const tab = TABS.find((t) => t.id === active)!
 
   return (
-    <section id="demo" className="py-24 px-4 bg-content1">
+    <section id="demo" className="py-16 sm:py-24 px-4 bg-content1">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-3xl font-bold text-foreground">Live Demo</h2>
           <p className="mt-3 text-foreground-500 text-lg">
             Fully interactive — calls the library directly in your browser.
@@ -58,7 +58,8 @@ export default function DemoSection() {
         </div>
 
         {/* Tab bar */}
-        <div className="border-b border-divider overflow-x-auto">
+        <div className="relative border-b border-divider">
+          <div className="overflow-x-auto scrollbar-hide">
           <div role="tablist" className="flex min-w-max">
             {TABS.map((t) => {
               const isActive = active === t.id
@@ -82,12 +83,15 @@ export default function DemoSection() {
               )
             })}
           </div>
+          </div>
+          {/* Right fade: hints at horizontal scroll on mobile */}
+          <div className="md:hidden pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-content1 to-transparent" />
         </div>
 
         {/* Panel */}
         <div
           role="tabpanel"
-          className="mt-6 rounded-xl border border-divider bg-content2 p-6"
+          className="mt-6 rounded-xl border border-divider bg-content2 p-4 sm:p-6"
         >
           <p className="text-sm text-foreground-500 mb-6">{tab.desc}</p>
           <div className={active === 'search' ? 'overflow-visible' : ''}>

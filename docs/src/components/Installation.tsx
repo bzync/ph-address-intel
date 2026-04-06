@@ -43,7 +43,7 @@ const hits = search('Sariaya')
 
 export default function Installation() {
   return (
-    <section id="install" className="py-24 px-4 bg-background">
+    <section id="install" className="py-16 sm:py-24 px-4 bg-background">
       <div className="max-w-4xl mx-auto space-y-14">
         <div>
           <SectionHeading tag="01" title="Installation" desc="Pick your package manager." />

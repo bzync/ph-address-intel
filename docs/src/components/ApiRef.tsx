@@ -99,10 +99,10 @@ const withZip = muns.filter(m => m.zipCodes.length > 0)`,
 
 export default function ApiRef() {
   return (
-    <section id="api" className="py-24 px-4 bg-content1">
+    <section id="api" className="py-16 sm:py-24 px-4 bg-content1">
       <div className="max-w-4xl mx-auto">
-        <div className="mb-12">
-          <h2 className="text-3xl font-bold text-foreground">API Reference</h2>
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">API Reference</h2>
           <p className="mt-3 text-foreground-500 text-lg">
             All functions are synchronous and return typed values — no promises, no network calls.
           </p>
@@ -114,7 +114,7 @@ export default function ApiRef() {
               <AccordionHeading>
                 <AccordionTrigger className="flex items-center gap-3 w-full px-5 py-4 text-left">
                   <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                  <span className="font-mono text-sm text-foreground flex-1">{fn.signature}</span>
+                  <span className="font-mono text-sm text-foreground flex-1 min-w-0 truncate" title={fn.signature}>{fn.signature}</span>
                   <AccordionIndicator />
                 </AccordionTrigger>
               </AccordionHeading>
