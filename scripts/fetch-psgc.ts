@@ -1,5 +1,8 @@
+// NOTE: xlsx is not listed as a devDependency due to known CVEs (GHSA-4r6h-8v6p-xvw6, GHSA-5pgg-2g8v-p4x9).
+// To run this script, install it temporarily: npm install xlsx && npx tsx scripts/fetch-psgc.ts
 import fs from 'fs/promises'
 import path from 'path'
+// @ts-ignore — xlsx is intentionally not in devDependencies; install ad-hoc when needed
 import * as XLSX from 'xlsx'
 
 type Region = {

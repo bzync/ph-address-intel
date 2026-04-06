@@ -2,6 +2,19 @@
     "name": "@bzync/ph-address-intel",
     "version": "0.1.5",
     "description": "Headless Philippine address lookup library with PSGC hierarchy and ZIP code autofill",
+    "keywords": [
+        "philippines",
+        "address",
+        "psgc",
+        "zip-code",
+        "barangay",
+        "municipality",
+        "province",
+        "region",
+        "philippine-standard-geographic-code",
+        "address-lookup",
+        "ph"
+    ],
     "author": {
         "name": "Rayan Vega Reynaldo",
         "email": "rayanvegareynaldo@gmail.com",
@@ -16,6 +29,9 @@
         "url": "https://github.com/bzync/ph-address-intel/issues"
     },
     "license": "MIT",
+    "engines": {
+        "node": ">=18"
+    },
     "type": "module",
     "main": "./dist/index.cjs",
     "module": "./dist/index.mjs",
@@ -47,8 +63,7 @@
         "tsup": "^8.0.2",
         "tsx": "^4.19.2",
         "typescript": "^5.6.3",
-        "vitest": "^4.1.2",
-        "xlsx": "^0.18.5"
+        "vitest": "^4.1.2"
     },
     "dependencies": {}
 }
