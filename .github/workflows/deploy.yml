@@ -24,7 +24,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
-          source: "docs/docker-compose.yml"
+          source: "docker-compose.yml"
           target: "~/ph-address-intel"
 
       - name: Deploy on VPS
@@ -35,7 +35,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script: |
-            cd ~/ph-address-intel/docs
+            cd ~/ph-address-intel
             docker compose pull
             docker compose up -d --remove-orphans
             docker image prune -f
