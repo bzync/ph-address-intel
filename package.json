@@ -29,6 +29,10 @@
         "url": "https://github.com/bzync/ph-address-intel/issues"
     },
     "license": "MIT",
+    "funding": {
+        "type": "github",
+        "url": "https://github.com/sponsors/rvrdev"
+    },
     "engines": {
         "node": ">=18"
     },
