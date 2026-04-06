@@ -1,56 +1,40 @@
-# 🇵🇭 PH Address Library
+# PH Address Intel
 
 > Framework-agnostic TypeScript library for Philippine address lookup, ZIP autofill, and hierarchical region → province → municipality → barangay selection.
 
-[![npm version](https://img.shields.io/npm/v/ph-address-intel)](https://www.npmjs.com/package/ph-address-intel)
+[![npm version](https://img.shields.io/npm/v/@bzync/ph-address-intel)](https://www.npmjs.com/package/@bzync/ph-address-intel)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
 
-## ✨ Features
+## Features
 
-- ⚡ **ZIP Autofill**  
-  Resolve a 4-digit ZIP code into region, province, municipality, and barangays.
-
-- 🗂️ **Cascading Selection**  
-  Full PSGC hierarchy:
-  `getRegions → getProvinces → getMunicipalities → getBarangays`
-
-- 🔍 **Free-Text Search**  
-  Search across all address levels with a single function.
-
-- 📦 **Zero Runtime Dependencies**  
-  No API calls. Works offline and at the edge.
-
-- 🏷️ **TypeScript First**  
-  Fully typed API with `.d.ts` support (CJS + ESM).
-
-- 🗺️ **Official PSGC Data**  
-  Based on PSA PSGC 4Q 2025  
-  Covers:
-  - 17 Regions  
-  - 80 Provinces  
-  - 42,000+ Barangays  
+- **ZIP Autofill** — Resolve a 4-digit ZIP code into region, province, municipality, and barangays.
+- **Cascading Selection** — Full PSGC hierarchy: `getRegions → getProvinces → getMunicipalities → getBarangays`
+- **Free-Text Search** — Search across all address levels with optional fuzzy matching.
+- **Alias Resolution** — Resolve region nicknames and abbreviations (e.g. `"NCR"`, `"CALABARZON"`) to PSGC codes.
+- **Validation** — Verify that address codes exist and form a consistent hierarchy.
+- **Zero Runtime Dependencies** — No API calls. Works offline and at the edge.
+- **TypeScript First** — Fully typed API with `.d.ts` support (CJS + ESM).
+- **Official PSGC Data** — Based on PSA PSGC Q4 2025. Covers 17 regions, 80 provinces, 42,000+ barangays.
 
 ---
 
-## 📦 Installation
+## Installation
 
 ```bash
-npm install ph-address-intel
+npm install @bzync/ph-address-intel
 ```
 
-### Other package managers
-
 ```bash
-yarn add ph-address-intel
-pnpm add ph-address-intel
-bun add ph-address-intel
+yarn add @bzync/ph-address-intel
+pnpm add @bzync/ph-address-intel
+bun add @bzync/ph-address-intel
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```ts
 import {
@@ -60,7 +44,9 @@ import {
   getMunicipalities,
   getBarangays,
   search,
-} from 'ph-address-intel'
+  resolveAlias,
+  validate,
+} from '@bzync/ph-address-intel'
 
 // ZIP autofill
 const result = lookupByZip('4322')
@@ -73,48 +59,115 @@ const barangays = getBarangays('045645000')
 
 // Free-text search
 const hits = search('Sariaya')
+
+// Alias resolution
+const ncr = resolveAlias('NCR')
+
+// Validation
+const check = validate({ regionCode: '040000000', provinceCode: '045600000' })
 ```
 
 ---
 
-## 🔢 ZIP Autofill Example
+## API Reference
+
+### `lookupByZip(zip: string): ZipLookupResult | null`
+
+Resolves a 4-digit ZIP code to the full address hierarchy.
 
 ```ts
 const result = lookupByZip('4322')
 
 if (result) {
-  console.log(result.region.name)
-  console.log(result.province?.name)
-  console.log(result.municipality.name)
-  console.log(result.barangays.length)
+  console.log(result.region.name)       // "Region IV-A (CALABARZON)"
+  console.log(result.province?.name)    // "Quezon"
+  console.log(result.municipality.name) // "Sariaya"
+  console.log(result.barangays.length)  // number of barangays
 }
 ```
 
 ---
 
-## 🧭 API Reference
+### Hierarchical getters
 
-### `lookupByZip(zip: string)`
-Resolve ZIP → full address hierarchy
+```ts
+getRegions(): Region[]
+getProvinces(regionCode: string): Province[]
+getMunicipalities(provinceCode: string): Municipality[]
+getBarangays(municipalityCode: string): Barangay[]
+```
 
-### `getRegions()`
-Returns all 17 Philippine regions
-
-### `getProvinces(regionCode: string)`
-Returns provinces within a region
-
-### `getMunicipalities(provinceCode: string)`
-Returns municipalities/cities in a province
-
-### `getBarangays(municipalityCode: string)`
-Returns barangays within a municipality
-
-### `search(query: string)`
-Search across all address levels
+Returns all items at each level. Pass the parent PSGC code to get children.
 
 ---
 
-## 🧠 TypeScript Types
+### Single-item lookups
+
+```ts
+getRegion(code: string): Region | undefined
+getProvince(code: string): Province | undefined
+getMunicipality(code: string): Municipality | undefined
+getBarangay(code: string): Barangay | undefined
+```
+
+O(1) lookups by PSGC code.
+
+---
+
+### `search(query: string, options?: SearchOptions): SearchResult[]`
+
+Searches across all address levels. Supports substring matching (default) and fuzzy matching.
+
+```ts
+// Substring search
+search('Manila')
+
+// Fuzzy search with options
+search('Mandaluyong', { fuzzy: true, limit: 5, types: ['municipality'] })
+```
+
+**`SearchOptions`**
+
+| Option  | Type                                                         | Default | Description                          |
+|---------|--------------------------------------------------------------|---------|--------------------------------------|
+| `fuzzy` | `boolean`                                                    | `false` | Enable Dice's bigram fuzzy matching  |
+| `limit` | `number`                                                     | —       | Max results to return                |
+| `types` | `Array<'region' \| 'province' \| 'municipality' \| 'barangay'>` | all     | Restrict search to specific levels   |
+
+Results are sorted by score (descending) when `fuzzy: true`.
+
+---
+
+### `resolveAlias(alias: string): SearchResult | null`
+
+Resolves a common region nickname, abbreviation, or number to a `SearchResult`. Returns `null` if not recognized.
+
+```ts
+resolveAlias('NCR')         // → { type: 'region', code: '130000000', name: '...' }
+resolveAlias('Region IV-A') // → { type: 'region', code: '040000000', name: '...' }
+resolveAlias('BARMM')       // → { type: 'region', code: '150000000', name: '...' }
+resolveAlias('unknown')     // → null
+```
+
+Recognized aliases include region numbers (`Region 1`–`13`), Roman numerals (`Region I`–`XIII`), official names, and common shorthands (`NCR`, `CAR`, `CALABARZON`, `MIMAROPA`, `CARAGA`, etc.).
+
+---
+
+### `validate(input: ValidationInput): ValidationResult`
+
+Validates that the provided PSGC codes exist and form a consistent hierarchy. Only fields that are provided are validated — partial inputs are fine.
+
+```ts
+validate({ regionCode: '040000000', provinceCode: '045600000' })
+// → { valid: true, errors: [] }
+
+validate({ regionCode: '040000000', provinceCode: '010100000' })
+// → { valid: false, errors: ['Province "Ilocos Norte" does not belong to region "040000000"'] }
+```
+
+---
+
+## TypeScript Types
 
 ```ts
 interface Region {
@@ -150,27 +203,55 @@ interface ZipLookupResult {
   municipality: Municipality
   barangays: Barangay[]
 }
+
+interface SearchResult {
+  type: 'region' | 'province' | 'municipality' | 'barangay'
+  code: string
+  name: string
+  score?: number
+  regionCode?: string
+  provinceCode?: string | null
+  municipalityCode?: string
+}
+
+interface SearchOptions {
+  fuzzy?: boolean
+  limit?: number
+  types?: Array<'region' | 'province' | 'municipality' | 'barangay'>
+}
+
+interface ValidationInput {
+  regionCode?: string
+  provinceCode?: string
+  municipalityCode?: string
+  barangayCode?: string
+}
+
+interface ValidationResult {
+  valid: boolean
+  errors: string[]
+}
 ```
 
 ---
 
-## 🧩 PSGC Code Structure
+## PSGC Code Structure
 
 ```
 RRPPMMMBBB
 ```
 
-| Part | Meaning |
-|------|--------|
-| RR   | Region |
-| PP   | Province |
+| Part | Meaning      |
+|------|--------------|
+| RR   | Region       |
+| PP   | Province     |
 | MMM  | Municipality |
-| BBB  | Barangay |
+| BBB  | Barangay     |
 
 Example:
 
 ```
-040000000  → Region IV-A
+040000000  → Region IV-A (CALABARZON)
 045600000  → Quezon
 045645000  → Sariaya
 045645001  → Barangay Antipolo
@@ -178,52 +259,20 @@ Example:
 
 ---
 
-## ⚠️ Notes
+## Notes
 
-- NCR has **no provinces** → `province = null`
-- ZIP dataset contains **~958 mappings**
-- Some barangays share ZIP codes
-- BARMM barangay data may be incomplete (PSGC limitation)
-
----
-
-## 🌐 Use Cases
-
-- Address forms (checkout, signup)
-- Government systems
-- Delivery/logistics apps
-- CRM systems
-- Mobile apps (offline support)
+- NCR has **no provinces** — `province` is `null` in ZIP lookup results.
+- ZIP dataset contains ~958 mappings; some barangays share ZIP codes.
+- BARMM barangay data may be incomplete (PSGC limitation).
 
 ---
 
-## 📊 Why This Library?
-
-Unlike other PH address libraries:
-- ✅ No API required
-- ✅ Fully offline
-- ✅ Complete PSGC hierarchy
-- ✅ ZIP → barangay resolution
-- ✅ Type-safe out of the box
-
----
-
-## 🛠️ Roadmap
-
-- [ ] React/Vue autocomplete components
-- [ ] CLI tools
-- [ ] Dataset updates automation
-- [ ] Validation helpers
-
----
-
-## 📄 License
+## License
 
 MIT License © 2026
 
 ---
 
-## ⭐ Support
+## Support
 
-If this helped you, consider starring the repo ⭐  
-https://github.com/rzarviandoe/ph-address-intel
+Star the repo if this helped you: https://github.com/bzync/ph-address-intel

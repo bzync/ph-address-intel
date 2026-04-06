@@ -1,12 +1,26 @@
 import { useState, useMemo } from 'react'
-import { Select, SelectItem, Card, CardHeader, CardBody, Divider, Chip } from '@heroui/react'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectIndicator,
+  SelectPopover,
+  ListBox,
+  ListBoxItem,
+  Label,
+  Card,
+  CardHeader,
+  CardContent,
+  Separator,
+  Chip,
+} from '@heroui/react'
 import {
   getRegions,
   getProvinces,
   getMunicipalities,
   getBarangays,
-} from 'ph-reg-bgry-mun-city-prov-zip'
-import type { Region, Province, Municipality, Barangay } from 'ph-reg-bgry-mun-city-prov-zip'
+} from '@bzync/ph-address-intel'
+import type { Region, Province, Municipality, Barangay } from '@bzync/ph-address-intel'
 
 const allRegions = getRegions()
 
@@ -54,73 +68,122 @@ export default function CascadeDemo() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Select
-          label="Region"
-          placeholder="Select a region"
-          selectedKeys={region ? [region.code] : []}
-          onChange={(e) => e.target.value && onRegion(e.target.value)}
-          variant="bordered"
-        >
-          {allRegions.map((r) => (
-            <SelectItem key={r.code}>{r.name}</SelectItem>
-          ))}
-        </Select>
+        <div>
+          <Select
+            selectedKey={region?.code ?? null}
+            onSelectionChange={(key) => key && onRegion(String(key))}
+          >
+            <Label className="text-sm text-foreground-500 mb-1 block">Region</Label>
+            <SelectTrigger>
+              <SelectValue>{({ selectedText }) => selectedText || 'Select a region'}</SelectValue>
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectPopover>
+              <ListBox>
+                {allRegions.map((r) => (
+                  <ListBoxItem key={r.code} id={r.code}>{r.name}</ListBoxItem>
+                ))}
+              </ListBox>
+            </SelectPopover>
+          </Select>
+        </div>
 
-        <Select
-          label={`Province${provinces.length > 0 ? ` (${provinces.length})` : ''}`}
-          placeholder={
-            region
-              ? provinces.length === 0
-                ? 'No provinces (NCR)'
-                : 'Select a province'
-              : 'Select a region first'
-          }
-          selectedKeys={province ? [province.code] : []}
-          onChange={(e) => e.target.value && onProvince(e.target.value)}
-          isDisabled={!region || provinces.length === 0}
-          variant="bordered"
-        >
-          {provinces.map((p) => (
-            <SelectItem key={p.code}>{p.name}</SelectItem>
-          ))}
-        </Select>
+        <div>
+          <Select
+            selectedKey={province?.code ?? null}
+            onSelectionChange={(key) => key && onProvince(String(key))}
+            isDisabled={!region || provinces.length === 0}
+          >
+            <Label className="text-sm text-foreground-500 mb-1 block">
+              {`Province${provinces.length > 0 ? ` (${provinces.length})` : ''}`}
+            </Label>
+            <SelectTrigger>
+              <SelectValue>
+                {({ selectedText }) =>
+                  selectedText ||
+                  (region
+                    ? provinces.length === 0
+                      ? 'No provinces (NCR)'
+                      : 'Select a province'
+                    : 'Select a region first')
+                }
+              </SelectValue>
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectPopover>
+              <ListBox>
+                {provinces.map((p) => (
+                  <ListBoxItem key={p.code} id={p.code}>{p.name}</ListBoxItem>
+                ))}
+              </ListBox>
+            </SelectPopover>
+          </Select>
+        </div>
 
-        <Select
-          label={`Municipality / City${municipalities.length > 0 ? ` (${municipalities.length})` : ''}`}
-          placeholder={province ? 'Select a municipality' : 'Select a province first'}
-          selectedKeys={municipality ? [municipality.code] : []}
-          onChange={(e) => e.target.value && onMunicipality(e.target.value)}
-          isDisabled={municipalities.length === 0}
-          variant="bordered"
-        >
-          {municipalities.map((m) => (
-            <SelectItem key={m.code}>
-              {m.name}{m.isCity ? ' (City)' : ''}{m.zipCodes.length > 0 ? ` — ${m.zipCodes.join(', ')}` : ''}
-            </SelectItem>
-          ))}
-        </Select>
+        <div>
+          <Select
+            selectedKey={municipality?.code ?? null}
+            onSelectionChange={(key) => key && onMunicipality(String(key))}
+            isDisabled={municipalities.length === 0}
+          >
+            <Label className="text-sm text-foreground-500 mb-1 block">
+              {`Municipality / City${municipalities.length > 0 ? ` (${municipalities.length})` : ''}`}
+            </Label>
+            <SelectTrigger>
+              <SelectValue>
+                {({ selectedText }) =>
+                  selectedText || (province ? 'Select a municipality' : 'Select a province first')
+                }
+              </SelectValue>
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectPopover>
+              <ListBox>
+                {municipalities.map((m) => (
+                  <ListBoxItem key={m.code} id={m.code}>
+                    {m.name}{m.isCity ? ' (City)' : ''}{m.zipCodes.length > 0 ? ` — ${m.zipCodes.join(', ')}` : ''}
+                  </ListBoxItem>
+                ))}
+              </ListBox>
+            </SelectPopover>
+          </Select>
+        </div>
 
-        <Select
-          label={`Barangay${barangays.length > 0 ? ` (${barangays.length})` : ''}`}
-          placeholder={municipality ? 'Select a barangay' : 'Select a municipality first'}
-          selectedKeys={barangay ? [barangay.code] : []}
-          onChange={(e) => e.target.value && onBarangay(e.target.value)}
-          isDisabled={barangays.length === 0}
-          variant="bordered"
-        >
-          {barangays.map((b) => (
-            <SelectItem key={b.code}>{b.name}</SelectItem>
-          ))}
-        </Select>
+        <div>
+          <Select
+            selectedKey={barangay?.code ?? null}
+            onSelectionChange={(key) => key && onBarangay(String(key))}
+            isDisabled={barangays.length === 0}
+          >
+            <Label className="text-sm text-foreground-500 mb-1 block">
+              {`Barangay${barangays.length > 0 ? ` (${barangays.length})` : ''}`}
+            </Label>
+            <SelectTrigger>
+              <SelectValue>
+                {({ selectedText }) =>
+                  selectedText || (municipality ? 'Select a barangay' : 'Select a municipality first')
+                }
+              </SelectValue>
+              <SelectIndicator />
+            </SelectTrigger>
+            <SelectPopover>
+              <ListBox>
+                {barangays.map((b) => (
+                  <ListBoxItem key={b.code} id={b.code}>{b.name}</ListBoxItem>
+                ))}
+              </ListBox>
+            </SelectPopover>
+          </Select>
+        </div>
       </div>
 
       {region ? (
-        <Card shadow="none" className="border border-divider">
+        <Card className="border border-divider">
           <CardHeader className="px-5 py-3 text-sm font-medium text-foreground">
             Selected address
           </CardHeader>
-          <Divider />
-          <CardBody className="p-5">
+          <Separator />
+          <CardContent className="p-5">
             <div className="flex flex-wrap gap-1.5 items-center text-sm">
               <Crumb label={region.name} />
               {province && <><Arrow /><Crumb label={province.name} /></>}
@@ -142,7 +205,7 @@ export default function CascadeDemo() {
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       {municipality.zipCodes.map((z) => (
-                        <Chip key={z} size="sm" color="primary" variant="flat" className="font-mono font-semibold">
+                        <Chip key={z} size="sm" color="accent" variant="soft" className="font-mono font-semibold">
                           {z}
                         </Chip>
                       ))}
@@ -172,7 +235,7 @@ export default function CascadeDemo() {
                 )}
               </div>
             )}
-          </CardBody>
+          </CardContent>
         </Card>
       ) : (
         <div className="rounded-xl border-2 border-dashed border-divider p-8 text-center text-foreground-400 text-sm">
@@ -187,7 +250,7 @@ function Crumb({ label, badge }: { label: string; badge?: string }) {
   return (
     <span className="flex items-center gap-1.5">
       <span className="text-foreground font-medium">{label}</span>
-      {badge && <Chip size="sm" color="secondary" variant="flat">{badge}</Chip>}
+      {badge && <Chip size="sm" color="default" variant="soft">{badge}</Chip>}
     </span>
   )
 }

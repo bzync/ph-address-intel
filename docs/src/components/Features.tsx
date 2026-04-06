@@ -1,4 +1,4 @@
-import { Card, CardBody } from '@heroui/react'
+import { Card, CardContent } from '@heroui/react'
 
 const features = [
   {
@@ -48,14 +48,13 @@ export default function Features() {
           {features.map((f) => (
             <Card
               key={f.title}
-              shadow="none"
               className="border border-divider hover:border-primary/30 transition-colors"
             >
-              <CardBody className="p-6 gap-3">
+              <CardContent className="p-6 gap-3 flex flex-col">
                 <div className="text-3xl">{f.icon}</div>
                 <h3 className="font-semibold text-foreground text-base">{f.title}</h3>
                 <p className="text-foreground-500 text-sm leading-relaxed">{f.desc}</p>
-              </CardBody>
+              </CardContent>
             </Card>
           ))}
         </div>

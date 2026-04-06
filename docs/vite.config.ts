@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   resolve: {
     alias: {
-      'ph-reg-bgry-mun-city-prov-zip': path.resolve(__dirname, '../src/index.ts'),
+      '@bzync/ph-address-intel': path.resolve(__dirname, '../src/index.ts'),
     },
   },
 })

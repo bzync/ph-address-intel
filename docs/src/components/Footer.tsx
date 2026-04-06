@@ -1,4 +1,4 @@
-import { Link, Divider, Chip } from '@heroui/react'
+import { Link, Separator, Chip } from '@heroui/react'
 
 export default function Footer() {
   return (
@@ -7,8 +7,8 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <span className="text-primary font-mono font-semibold">PH</span>
           <span className="text-foreground-400">Address Library</span>
-          <Divider orientation="vertical" className="h-4" />
-          <Chip size="sm" variant="flat" color="default" className="font-mono">v0.1.0</Chip>
+          <Separator orientation="vertical" className="h-4" />
+          <Chip size="sm" variant="soft" className="font-mono">v0.1.3</Chip>
         </div>
 
         <div className="flex items-center gap-5">
@@ -17,9 +17,7 @@ export default function Footer() {
             <Link
               href="https://psa.gov.ph/classification/psgc"
               target="_blank"
-              size="sm"
-              color="foreground"
-              className="underline underline-offset-2"
+              className="underline underline-offset-2 text-sm text-foreground-500 hover:text-foreground"
             >
               PSA PSGC 4Q-2025
             </Link>

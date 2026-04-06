@@ -47,7 +47,26 @@ export interface SearchResult {
     type: 'region' | 'province' | 'municipality' | 'barangay'
     code: string
     name: string
+    score?: number
     regionCode?: string
     provinceCode?: string | null
     municipalityCode?: string
+}
+
+export interface SearchOptions {
+    fuzzy?: boolean
+    limit?: number
+    types?: Array<'region' | 'province' | 'municipality' | 'barangay'>
+}
+
+export interface ValidationInput {
+    regionCode?: string
+    provinceCode?: string
+    municipalityCode?: string
+    barangayCode?: string
+}
+
+export interface ValidationResult {
+    valid: boolean
+    errors: string[]
 }

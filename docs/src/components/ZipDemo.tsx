@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Input, Button, Chip, Card, CardHeader, CardBody, Divider } from '@heroui/react'
-import { lookupByZip } from 'ph-reg-bgry-mun-city-prov-zip'
-import type { ZipLookupResult } from 'ph-reg-bgry-mun-city-prov-zip'
+import { TextField, Label, Input, Button, Chip, Card, CardHeader, CardContent, Separator } from '@heroui/react'
+import { lookupByZip } from '@bzync/ph-address-intel'
+import type { ZipLookupResult } from '@bzync/ph-address-intel'
 
 const PRESETS = [
   { zip: '4322', label: 'Sariaya, Quezon' },
@@ -24,20 +24,22 @@ export default function ZipDemo() {
   return (
     <div className="space-y-6">
       <div className="flex gap-3 items-end">
-        <Input
-          type="text"
-          label="Philippine ZIP Code"
-          placeholder="e.g. 4322"
-          maxLength={4}
+        <TextField
           value={zip}
-          onValueChange={lookup}
-          inputMode="numeric"
+          onChange={lookup}
           className="max-w-[180px]"
-          classNames={{ input: 'font-mono text-base' }}
-          variant="bordered"
-        />
+        >
+          <Label className="text-sm text-foreground-500">Philippine ZIP Code</Label>
+          <Input
+            type="text"
+            placeholder="e.g. 4322"
+            maxLength={4}
+            inputMode="numeric"
+            className="font-mono text-base"
+          />
+        </TextField>
         <Button
-          variant="flat"
+          variant="ghost"
           onPress={() => lookup('')}
           className="mb-0.5"
         >
@@ -50,7 +52,7 @@ export default function ZipDemo() {
         {PRESETS.map(({ zip: z, label }) => (
           <Chip
             key={z}
-            variant="flat"
+            variant="soft"
             size="sm"
             className="cursor-pointer font-mono"
             onClick={() => lookup(z)}
@@ -67,16 +69,16 @@ export default function ZipDemo() {
       )}
 
       {result === null && (
-        <Card shadow="none" className="border border-danger/30 bg-danger/10">
-          <CardBody className="p-5">
-            <p className="font-medium text-danger text-sm">No match found for ZIP "{zip}"</p>
+        <Card className="border border-danger/30 bg-danger/10">
+          <CardContent className="p-5">
+            <p className="font-medium text-danger text-sm">No match found for ZIP &ldquo;{zip}&rdquo;</p>
             <p className="text-foreground-500 mt-1 text-sm">This ZIP code is not in the dataset.</p>
-          </CardBody>
+          </CardContent>
         </Card>
       )}
 
       {result && (
-        <Card shadow="none" className="border border-divider">
+        <Card className="border border-divider">
           <CardHeader className="px-5 py-3 flex items-center gap-2">
             <span className="text-success text-sm">✓</span>
             <span className="font-medium text-sm text-foreground">
@@ -86,8 +88,8 @@ export default function ZipDemo() {
               </code>
             </span>
           </CardHeader>
-          <Divider />
-          <CardBody className="p-5 space-y-5">
+          <Separator />
+          <CardContent className="p-5 space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <ResultField label="Region" value={result.region.name} code={result.region.code} />
               <ResultField
@@ -116,7 +118,7 @@ export default function ZipDemo() {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {result.barangays.slice(0, 10).map((b) => (
-                    <Chip key={b.code} size="sm" color="primary" variant="flat">
+                    <Chip key={b.code} size="sm" color="accent" variant="soft">
                       {b.name}
                     </Chip>
                   ))}
@@ -128,7 +130,7 @@ export default function ZipDemo() {
                 </div>
               </div>
             )}
-          </CardBody>
+          </CardContent>
         </Card>
       )}
     </div>
@@ -155,7 +157,7 @@ function ResultField({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-foreground font-medium text-sm">{value}</span>
           {badge && (
-            <Chip size="sm" color="secondary" variant="flat">{badge}</Chip>
+            <Chip size="sm" color="default" variant="soft">{badge}</Chip>
           )}
           {code && (
             <code className="text-xs text-foreground-400 font-mono bg-content2 px-1.5 py-0.5 rounded">

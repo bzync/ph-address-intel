@@ -1,12 +1,11 @@
-import { useState } from 'react'
-import { Tabs, Tab } from '@heroui/react'
+import { Tabs, TabList, Tab, TabPanel } from '@heroui/react'
 import CodeBlock from './CodeBlock'
 
 const managers = [
-  { label: 'npm', code: 'npm install ph-reg-bgry-mun-city-prov-zip' },
-  { label: 'yarn', code: 'yarn add ph-reg-bgry-mun-city-prov-zip' },
-  { label: 'pnpm', code: 'pnpm add ph-reg-bgry-mun-city-prov-zip' },
-  { label: 'bun', code: 'bun add ph-reg-bgry-mun-city-prov-zip' },
+  { label: 'npm', code: 'npm install @bzync/ph-address-intel' },
+  { label: 'yarn', code: 'yarn add @bzync/ph-address-intel' },
+  { label: 'pnpm', code: 'pnpm add @bzync/ph-address-intel' },
+  { label: 'bun', code: 'bun add @bzync/ph-address-intel' },
 ]
 
 const quickStart = `import {
@@ -16,7 +15,7 @@ const quickStart = `import {
   getMunicipalities,
   getBarangays,
   search,
-} from 'ph-reg-bgry-mun-city-prov-zip'
+} from '@bzync/ph-address-intel'
 
 // --- ZIP autofill ---
 const result = lookupByZip('4322')
@@ -43,32 +42,24 @@ const hits = search('Sariaya')
 // [{ type: 'municipality', code: '045645000', name: 'Sariaya', ... }]`
 
 export default function Installation() {
-  const [activeManager, setActiveManager] = useState('npm')
-  const installCode = managers.find((m) => m.label === activeManager)?.code ?? managers[0].code
-
   return (
     <section id="install" className="py-24 px-4 bg-background">
       <div className="max-w-4xl mx-auto space-y-14">
         <div>
           <SectionHeading tag="01" title="Installation" desc="Pick your package manager." />
           <div className="mt-6">
-            <Tabs
-              selectedKey={activeManager}
-              onSelectionChange={(k) => setActiveManager(k as string)}
-              color="primary"
-              variant="underlined"
-              size="sm"
-              classNames={{
-                tabList: 'border-b border-divider gap-4',
-              }}
-            >
+            <Tabs defaultSelectedKey="npm" variant="primary">
+              <TabList className="border-b border-divider gap-4">
+                {managers.map((m) => (
+                  <Tab key={m.label} id={m.label} className="text-sm">{m.label}</Tab>
+                ))}
+              </TabList>
               {managers.map((m) => (
-                <Tab key={m.label} title={m.label} />
+                <TabPanel key={m.label} id={m.label} className="mt-4">
+                  <CodeBlock code={m.code} language="bash" />
+                </TabPanel>
               ))}
             </Tabs>
-            <div className="mt-4">
-              <CodeBlock code={installCode} language="bash" />
-            </div>
           </div>
         </div>
 

@@ -1,8 +1,52 @@
-import { Tabs, Tab, Card, CardBody, CardHeader } from '@heroui/react'
+import { useState } from 'react'
 import ZipDemo from './ZipDemo'
 import CascadeDemo from './CascadeDemo'
+import SearchDemo from './SearchDemo'
+import ValidateDemo from './ValidateDemo'
+import AliasDemo from './AliasDemo'
+
+type TabId = 'zip' | 'cascade' | 'search' | 'validate' | 'alias'
+
+const TABS: { id: TabId; label: string; desc: string }[] = [
+  {
+    id: 'zip',
+    label: 'ZIP Autofill',
+    desc: 'Type a ZIP code → resolve to region, province, municipality & barangays',
+  },
+  {
+    id: 'cascade',
+    label: 'Cascading Selection',
+    desc: 'Hierarchical dropdowns driven by the PSGC hierarchy',
+  },
+  {
+    id: 'search',
+    label: 'Search',
+    desc: 'Search across regions, provinces, municipalities, and barangays — exact or fuzzy',
+  },
+  {
+    id: 'validate',
+    label: 'Validate',
+    desc: 'Validate PSGC codes and check that they form a consistent hierarchy',
+  },
+  {
+    id: 'alias',
+    label: 'Alias',
+    desc: 'Resolve common region aliases (NCR, CALABARZON, BARMM, …) to PSGC codes',
+  },
+]
+
+const PANELS: Record<TabId, React.ReactNode> = {
+  zip: <ZipDemo />,
+  cascade: <CascadeDemo />,
+  search: <SearchDemo />,
+  validate: <ValidateDemo />,
+  alias: <AliasDemo />,
+}
 
 export default function DemoSection() {
+  const [active, setActive] = useState<TabId>('zip')
+  const tab = TABS.find((t) => t.id === active)!
+
   return (
     <section id="demo" className="py-24 px-4 bg-content1">
       <div className="max-w-4xl mx-auto">
@@ -13,51 +57,43 @@ export default function DemoSection() {
           </p>
         </div>
 
-        <Tabs
-          aria-label="Demo tabs"
-          color="primary"
-          variant="underlined"
-          classNames={{
-            tabList: 'gap-6 border-b border-divider',
-            tab: 'pb-4',
-            cursor: 'bg-primary',
-          }}
+        {/* Tab bar */}
+        <div className="border-b border-divider overflow-x-auto">
+          <div role="tablist" className="flex min-w-max">
+            {TABS.map((t) => {
+              const isActive = active === t.id
+              return (
+                <button
+                  key={t.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  type="button"
+                  onClick={() => setActive(t.id)}
+                  className={[
+                    'relative px-5 py-3 text-sm font-medium transition-colors whitespace-nowrap',
+                    'after:absolute after:-bottom-px after:left-0 after:right-0 after:h-0.5 after:rounded-full after:transition-colors',
+                    isActive
+                      ? 'text-foreground after:bg-primary'
+                      : 'text-foreground-400 hover:text-foreground-600 after:bg-transparent',
+                  ].join(' ')}
+                >
+                  {t.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Panel */}
+        <div
+          role="tabpanel"
+          className="mt-6 rounded-xl border border-divider bg-content2 p-6"
         >
-          <Tab
-            key="zip"
-            title={
-              <span className="flex items-center gap-2">
-                <span>🔢</span> ZIP Autofill
-              </span>
-            }
-          >
-            <Card shadow="none" className="border border-divider mt-4">
-              <CardHeader className="text-sm text-foreground-500 px-6 py-4">
-                Type a ZIP code → resolve to region, province, municipality &amp; barangays
-              </CardHeader>
-              <CardBody className="p-6">
-                <ZipDemo />
-              </CardBody>
-            </Card>
-          </Tab>
-          <Tab
-            key="cascade"
-            title={
-              <span className="flex items-center gap-2">
-                <span>🗂️</span> Cascading Selection
-              </span>
-            }
-          >
-            <Card shadow="none" className="border border-divider mt-4">
-              <CardHeader className="text-sm text-foreground-500 px-6 py-4">
-                Hierarchical dropdowns driven by the PSGC hierarchy
-              </CardHeader>
-              <CardBody className="p-6">
-                <CascadeDemo />
-              </CardBody>
-            </Card>
-          </Tab>
-        </Tabs>
+          <p className="text-sm text-foreground-500 mb-6">{tab.desc}</p>
+          <div className={active === 'search' ? 'overflow-visible' : ''}>
+            {PANELS[active]}
+          </div>
+        </div>
       </div>
     </section>
   )

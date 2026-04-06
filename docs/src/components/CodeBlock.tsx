@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Tooltip } from '@heroui/react'
+import { Button, Tooltip, TooltipContent } from '@heroui/react'
 
 interface Props {
   code: string
@@ -30,16 +30,17 @@ export default function CodeBlock({ code, language = 'typescript', filename }: P
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-foreground-400 font-mono">{language}</span>
-          <Tooltip content={copied ? 'Copied!' : 'Copy'} size="sm" placement="left">
+          <Tooltip>
             <Button
               isIconOnly
               size="sm"
-              variant="light"
+              variant="ghost"
               onPress={copy}
               className="w-6 h-6 min-w-6 text-foreground-400"
             >
               {copied ? <CheckIcon /> : <CopyIcon />}
             </Button>
+            <TooltipContent>{copied ? 'Copied!' : 'Copy'}</TooltipContent>
           </Tooltip>
         </div>
       </div>

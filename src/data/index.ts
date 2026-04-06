@@ -86,7 +86,9 @@ for (const m of municipalities) {
 }
 
 export const barangaysByMunicipalityCode = new Map<string, Barangay[]>()
+export const barangayByCode = new Map<string, Barangay>()
 for (const b of barangays) {
+    barangayByCode.set(b.code, b)
     const arr = barangaysByMunicipalityCode.get(b.municipalityCode) ?? []
     arr.push(b)
     barangaysByMunicipalityCode.set(b.municipalityCode, arr)

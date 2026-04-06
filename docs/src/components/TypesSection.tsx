@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader, Chip } from '@heroui/react'
+import { Card, CardHeader, CardContent, Chip } from '@heroui/react'
 import CodeBlock from './CodeBlock'
 
 const typeDefs = `interface Region {
@@ -70,7 +70,7 @@ export default function TypesSection() {
         <CodeBlock
           code={typeDefs}
           language="typescript"
-          filename="ph-reg-bgry-mun-city-prov-zip/types.ts"
+          filename="@bzync/ph-address-intel/types.ts"
         />
 
         <div>
@@ -82,12 +82,12 @@ export default function TypesSection() {
           <CodeBlock code={psgcNote} language="typescript" />
         </div>
 
-        <Card shadow="none" className="border border-warning/30 bg-warning/5">
-          <CardHeader className="px-6 pt-5 pb-0 gap-2">
-            <Chip size="sm" color="warning" variant="flat">Note</Chip>
+        <Card className="border border-warning/30 bg-warning/5">
+          <CardHeader className="px-6 pt-5 pb-0 gap-2 flex items-center">
+            <Chip size="sm" color="warning" variant="soft">Note</Chip>
             <h3 className="font-semibold text-warning text-sm">Data Coverage</h3>
           </CardHeader>
-          <CardBody className="px-6 pb-5 pt-3">
+          <CardContent className="px-6 pb-5 pt-3">
             <ul className="text-foreground-500 text-sm space-y-2 list-disc list-inside">
               <li>
                 <strong className="text-foreground">NCR</strong> — Cities sit directly under the
@@ -106,7 +106,7 @@ export default function TypesSection() {
                 Autonomous Region may be incomplete in the current PSGC 4Q-2025 publication.
               </li>
             </ul>
-          </CardBody>
+          </CardContent>
         </Card>
       </div>
     </section>

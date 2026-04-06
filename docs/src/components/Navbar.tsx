@@ -1,58 +1,38 @@
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Button,
-  Chip,
-  Link,
-} from '@heroui/react'
+import { Header, Chip, Link } from '@heroui/react'
 
 export default function AppNavbar() {
   return (
-    <Navbar
-      maxWidth="xl"
-      isBlurred
-      isBordered
-      classNames={{
-        base: 'bg-content1/80',
-        border: 'border-divider',
-      }}
-    >
-      <NavbarBrand>
-        <span className="text-primary font-mono font-semibold text-sm">PH</span>
-        <span className="ml-1 font-semibold text-sm text-foreground">Address</span>
-        <Chip size="sm" className="ml-2 font-mono">
-          v0.1.0
-        </Chip>
-      </NavbarBrand>
+    <Header className="sticky top-0 z-50 bg-content1/80 backdrop-blur border-b border-divider px-4">
+      <div className="max-w-screen-xl mx-auto w-full flex items-center justify-between h-16">
+        <div className="flex items-center gap-2">
+          <span className="text-primary font-mono font-semibold text-sm">PH</span>
+          <span className="font-semibold text-sm text-foreground">Address</span>
+          <Chip size="sm" className="ml-1 font-mono">v0.1.3</Chip>
+        </div>
 
-      <NavbarContent justify="end" className="gap-1">
-        {[
-          { label: 'Demo', href: '#demo' },
-          { label: 'Install', href: '#install' },
-          { label: 'API', href: '#api' },
-          { label: 'Types', href: '#types' },
-        ].map(({ label, href }) => (
-          <NavbarItem key={href}>
-            <Link href={href} className="text-foreground-500 hover:text-foreground">
+        <nav className="flex items-center gap-1">
+          {[
+            { label: 'Demo', href: '#demo' },
+            { label: 'Install', href: '#install' },
+            { label: 'API', href: '#api' },
+            { label: 'Types', href: '#types' },
+          ].map(({ label, href }) => (
+            <Link key={href} href={href} className="px-3 py-2 text-sm text-foreground-500 hover:text-foreground rounded-lg">
               {label}
             </Link>
-          </NavbarItem>
-        ))}
-        <NavbarItem className="ml-2">
-          <Button
-            as={Link}
+          ))}
+          <a
             href="https://github.com/rzarviandoe/ph-reg-bgry-mun-city-prov-zip"
             target="_blank"
-            size="sm"
-            startContent={<GitHubIcon className="w-4 h-4" />}
+            rel="noreferrer"
+            className="ml-2 inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-xl border border-divider hover:border-foreground-300 transition-colors text-foreground"
           >
+            <GitHubIcon className="w-4 h-4" />
             GitHub
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-    </Navbar>
+          </a>
+        </nav>
+      </div>
+    </Header>
   )
 }
 

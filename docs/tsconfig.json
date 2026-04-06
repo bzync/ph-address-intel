@@ -12,7 +12,7 @@
     "jsx": "react-jsx",
     "strict": true,
     "paths": {
-      "ph-reg-bgry-mun-city-prov-zip": ["../src/index.ts"]
+      "@bzync/ph-address-intel": ["../src/index.ts"]
     }
   },
   "include": ["src", "../src"]

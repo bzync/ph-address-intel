@@ -1,13 +1,16 @@
-import { Button, Chip, Link } from '@heroui/react'
+import { Chip } from '@heroui/react'
 import CodeBlock from './CodeBlock'
 
-const installSnippet = `npm install ph-reg-bgry-mun-city-prov-zip`
+const installSnippet = `npm install @bzync/ph-address-intel`
 
 const badges = [
   'TypeScript',
   'Zero deps',
   '17 Regions',
   '42 000+ Barangays',
+  'Full-text Search',
+  'Alias Lookup',
+  'Address Validation',
   'PSGC 4Q 2025',
 ]
 
@@ -17,7 +20,7 @@ export default function Hero() {
       <div className="max-w-3xl w-full text-center space-y-8">
         <div className="flex flex-wrap justify-center gap-2">
           {badges.map((label) => (
-            <Chip key={label} size="sm" variant="bordered" color="default">
+            <Chip key={label} size="sm" variant="secondary">
               {label}
             </Chip>
           ))}
@@ -26,14 +29,15 @@ export default function Hero() {
         <div className="space-y-4">
           <h1 className="text-5xl sm:text-6xl font-extrabold text-foreground leading-tight tracking-tight">
             Philippine Address{' '}
-            <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 to-violet-500 bg-clip-text text-transparent">
               Lookup Library
             </span>
           </h1>
           <p className="text-lg text-foreground-500 max-w-2xl mx-auto leading-relaxed">
-            Framework-agnostic TypeScript library for ZIP code autofill and hierarchical
+            Framework-agnostic TypeScript library for ZIP code autofill, full-text search,
+            alias resolution, and address validation across the hierarchical
             region&nbsp;→&nbsp;province&nbsp;→&nbsp;municipality&nbsp;→&nbsp;barangay
-            selection. Powered by official{' '}
+            structure. Powered by official{' '}
             <span className="text-foreground font-medium">PSGC&nbsp;data</span>.
           </p>
         </div>
@@ -43,24 +47,18 @@ export default function Hero() {
         </div>
 
         <div className="flex flex-wrap justify-center gap-3">
-          <Button
-            color="primary"
-            size="lg"
-            as={Link}
+          <a
             href="#demo"
-            className="font-semibold shadow-lg shadow-primary/20"
+            className="inline-flex items-center justify-center px-6 h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity"
           >
             Live Demo
-          </Button>
-          <Button
-            variant="bordered"
-            size="lg"
-            as={Link}
+          </a>
+          <a
             href="#api"
-            className="font-semibold"
+            className="inline-flex items-center justify-center px-6 h-11 rounded-xl border border-divider font-semibold text-sm text-foreground hover:border-foreground-300 transition-colors"
           >
             API Reference
-          </Button>
+          </a>
         </div>
 
         <div className="pt-8 flex justify-center animate-bounce">

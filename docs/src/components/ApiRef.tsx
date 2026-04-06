@@ -1,4 +1,13 @@
-import { Accordion, AccordionItem, Chip } from '@heroui/react'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionHeading,
+  AccordionTrigger,
+  AccordionPanel,
+  AccordionBody,
+  AccordionIndicator,
+  Chip,
+} from '@heroui/react'
 import CodeBlock from './CodeBlock'
 
 interface FnDef {
@@ -99,67 +108,61 @@ export default function ApiRef() {
           </p>
         </div>
 
-        <Accordion
-          variant="splitted"
-          selectionMode="multiple"
-          className="gap-3 px-0"
-          itemClasses={{
-            base: 'border border-divider shadow-none',
-            title: 'font-mono text-sm text-foreground',
-            trigger: 'px-5 py-4',
-            content: 'px-5 pb-5',
-          }}
-        >
+        <Accordion variant="surface" allowsMultipleExpanded className="gap-3">
           {fns.map((fn) => (
-            <AccordionItem
-              key={fn.name}
-              aria-label={fn.name}
-              title={fn.signature}
-              startContent={
-                <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-0.5" />
-              }
-            >
-              <div className="space-y-4">
-                <p className="text-foreground-500 text-sm">{fn.desc}</p>
+            <AccordionItem key={fn.name} className="border border-divider rounded-xl overflow-hidden">
+              <AccordionHeading>
+                <AccordionTrigger className="flex items-center gap-3 w-full px-5 py-4 text-left">
+                  <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                  <span className="font-mono text-sm text-foreground flex-1">{fn.signature}</span>
+                  <AccordionIndicator />
+                </AccordionTrigger>
+              </AccordionHeading>
+              <AccordionPanel>
+                <AccordionBody className="px-5 pb-5">
+                  <div className="space-y-4">
+                    <p className="text-foreground-500 text-sm">{fn.desc}</p>
 
-                {fn.params && fn.params.length > 0 && (
-                  <div>
-                    <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
-                      Parameters
-                    </p>
-                    <div className="space-y-2">
-                      {fn.params.map((p) => (
-                        <div key={p.name} className="flex gap-3 text-sm">
-                          <code className="font-mono text-primary shrink-0">{p.name}</code>
-                          <code className="text-foreground-400 font-mono shrink-0">{p.type}</code>
-                          <span className="text-foreground-500">{p.desc}</span>
+                    {fn.params && fn.params.length > 0 && (
+                      <div>
+                        <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
+                          Parameters
+                        </p>
+                        <div className="space-y-2">
+                          {fn.params.map((p) => (
+                            <div key={p.name} className="flex gap-3 text-sm">
+                              <code className="font-mono text-primary shrink-0">{p.name}</code>
+                              <code className="text-foreground-400 font-mono shrink-0">{p.type}</code>
+                              <span className="text-foreground-500">{p.desc}</span>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
+                        Returns
+                      </p>
+                      <p className="text-sm text-foreground-500">{fn.returns}</p>
+                    </div>
+
+                    {fn.note && (
+                      <div className="bg-warning/10 border border-warning/20 rounded-lg px-4 py-3 text-sm text-warning flex gap-2 items-start">
+                        <Chip size="sm" color="warning" variant="soft">Note</Chip>
+                        <span>{fn.note}</span>
+                      </div>
+                    )}
+
+                    <div>
+                      <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
+                        Example
+                      </p>
+                      <CodeBlock code={fn.example} language="typescript" />
                     </div>
                   </div>
-                )}
-
-                <div>
-                  <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
-                    Returns
-                  </p>
-                  <p className="text-sm text-foreground-500">{fn.returns}</p>
-                </div>
-
-                {fn.note && (
-                  <div className="bg-warning/10 border border-warning/20 rounded-lg px-4 py-3 text-sm text-warning flex gap-2">
-                    <Chip size="sm" color="warning" variant="flat">Note</Chip>
-                    <span>{fn.note}</span>
-                  </div>
-                )}
-
-                <div>
-                  <p className="text-xs font-semibold text-foreground-400 uppercase tracking-wider mb-2">
-                    Example
-                  </p>
-                  <CodeBlock code={fn.example} language="typescript" />
-                </div>
-              </div>
+                </AccordionBody>
+              </AccordionPanel>
             </AccordionItem>
           ))}
         </Accordion>
