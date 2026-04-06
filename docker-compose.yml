@@ -7,3 +7,10 @@ services:
     ports:
       - "8091:80"
     restart: unless-stopped
+    networks:
+      - proxy_manager_net
+
+networks:
+  proxy_manager_net:
+    name: proxy_manager_net
+    driver: bridge
