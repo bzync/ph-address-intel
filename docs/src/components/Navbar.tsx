@@ -20,7 +20,7 @@ export default function AppNavbar() {
           <div className="flex items-center gap-2">
             <span className="text-primary font-mono font-semibold text-sm">PH</span>
             <span className="font-semibold text-sm text-foreground">Address</span>
-            <Chip size="sm" className="ml-1 font-mono">v0.1.3</Chip>
+            <Chip size="sm" className="ml-1 font-mono">v0.1.5</Chip>
           </div>
 
           {/* Desktop nav */}
