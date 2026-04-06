@@ -72,7 +72,7 @@ export default function AppNavbar() {
             </a>
           ))}
           <a
-            href="https://github.com/rzarviandoe/ph-reg-bgry-mun-city-prov-zip"
+            href="https://github.com/bzync/ph-address-intel"
             target="_blank"
             rel="noreferrer"
             onClick={() => setMobileOpen(false)}
