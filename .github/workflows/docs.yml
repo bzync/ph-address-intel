@@ -2,8 +2,6 @@ name: Deploy to AWS VPS
 
 on:
   push:
-    tags:
-      - 'v*'
     paths:
       - 'docs/**'
       - '.github/workflows/deploy.yml'
