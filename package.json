@@ -1,6 +1,6 @@
 {
     "name": "@bzync/ph-address-intel",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "Headless Philippine address lookup library with PSGC hierarchy and ZIP code autofill",
     "keywords": [
         "philippines",
