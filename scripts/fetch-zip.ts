@@ -11,10 +11,16 @@ type ZipRow = {
 
 type ZipMap = Record<string, string[]>
 
-const URL = 'https://phlpost.gov.ph/zip-code-locator/'
+const SOURCE_URL = 'https://phlpost.gov.ph/zip-code-locator/'
 const OUTPUT_DIR = path.resolve(process.cwd(), 'src/data')
 const RAW_OUTPUT_FILE = path.join(OUTPUT_DIR, 'zip-raw.json')
 const MAP_OUTPUT_FILE = path.join(OUTPUT_DIR, 'zip.json')
+
+/** Maximum response body size accepted (5 MB). Prevents memory exhaustion from unexpectedly large responses. */
+const MAX_RESPONSE_BYTES = 5 * 1024 * 1024
+
+/** Request timeout in milliseconds. */
+const FETCH_TIMEOUT_MS = 30_000
 
 function clean(text: string): string {
     return text.replace(/\s+/g, ' ').trim()
@@ -31,17 +37,42 @@ function normalizeMunicipality(name: string): string {
 }
 
 async function fetchHtml(url: string): Promise<string> {
-    const res = await fetch(url, {
-        headers: {
-            'user-agent': 'Mozilla/5.0 ph-address zip data builder'
-        }
-    })
+    // Enforce HTTPS to prevent MITM on the data fetch
+    if (!url.startsWith('https://')) {
+        throw new Error(`Refusing to fetch over non-HTTPS URL: ${url}`)
+    }
+
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
+    let res: Response
+    try {
+        res = await fetch(url, {
+            signal: controller.signal,
+            headers: {
+                'user-agent': 'Mozilla/5.0 ph-address zip data builder'
+            }
+        })
+    } finally {
+        clearTimeout(timer)
+    }
 
     if (!res.ok) {
         throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`)
     }
 
-    return await res.text()
+    // Guard against unexpectedly large responses
+    const contentLength = res.headers.get('content-length')
+    if (contentLength !== null && parseInt(contentLength, 10) > MAX_RESPONSE_BYTES) {
+        throw new Error(`Response too large: content-length ${contentLength} exceeds ${MAX_RESPONSE_BYTES} bytes`)
+    }
+
+    const buffer = await res.arrayBuffer()
+    if (buffer.byteLength > MAX_RESPONSE_BYTES) {
+        throw new Error(`Response body too large: ${buffer.byteLength} bytes exceeds ${MAX_RESPONSE_BYTES} bytes`)
+    }
+
+    return new TextDecoder().decode(buffer)
 }
 
 function parseTableRows(html: string): ZipRow[] {
@@ -85,8 +116,8 @@ function buildZipMap(rows: ZipRow[]): ZipMap {
             zipMap[zip] = []
         }
 
-        if (!zipMap[zip].includes(municipality)) {
-            zipMap[zip].push(municipality)
+        if (!zipMap[zip]!.includes(municipality)) {
+            zipMap[zip]!.push(municipality)
         }
     }
 
@@ -101,9 +132,9 @@ async function writeJson(filePath: string, data: unknown): Promise<void> {
 }
 
 async function main(): Promise<void> {
-    console.log(`Fetching ZIP locator from ${URL}`)
+    console.log(`Fetching ZIP locator from ${SOURCE_URL}`)
 
-    const html = await fetchHtml(URL)
+    const html = await fetchHtml(SOURCE_URL)
     const rows = parseTableRows(html)
 
     if (rows.length === 0) {

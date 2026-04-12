@@ -7,7 +7,12 @@ import {
 } from './data/index'
 import type { ZipLookupResult } from './types'
 
+/** Philippine ZIP codes are exactly 4 decimal digits. */
+const ZIP_RE = /^\d{4}$/
+
 export function lookupByZip(zip: string): ZipLookupResult | null {
+    if (typeof zip !== 'string' || !ZIP_RE.test(zip)) return null
+
     const munCode = zipToMunCode[zip]
     if (munCode === undefined) return null
 

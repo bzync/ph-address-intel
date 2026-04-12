@@ -21,32 +21,39 @@ export function getRegions(): Region[] {
 }
 
 export function getProvinces(regionCode: string): Province[] {
+    if (typeof regionCode !== 'string') return []
     return provincesByRegionCode.get(regionCode) ?? []
 }
 
 export function getMunicipalities(provinceCode: string): Municipality[] {
+    if (typeof provinceCode !== 'string') return []
     return municipalitiesByProvinceCode.get(provinceCode) ?? []
 }
 
 export function getBarangays(municipalityCode: string): Barangay[] {
+    if (typeof municipalityCode !== 'string') return []
     return barangaysByMunicipalityCode.get(municipalityCode) ?? []
 }
 
 // ─── O(1) code lookups ───────────────────────────────────────────────────────
 
 export function getRegion(code: string): Region | undefined {
+    if (typeof code !== 'string') return undefined
     return regionByCode.get(code)
 }
 
 export function getProvince(code: string): Province | undefined {
+    if (typeof code !== 'string') return undefined
     return provinceByCode.get(code)
 }
 
 export function getMunicipality(code: string): Municipality | undefined {
+    if (typeof code !== 'string') return undefined
     return municipalityByCode.get(code)
 }
 
 export function getBarangay(code: string): Barangay | undefined {
+    if (typeof code !== 'string') return undefined
     return barangayByCode.get(code)
 }
 
@@ -57,6 +64,8 @@ function resolveProvince(m: Municipality): Province | null {
 }
 
 export function getFullPath(code: string): FullPath | null {
+    if (typeof code !== 'string') return null
+
     const barangay = barangayByCode.get(code)
     if (barangay) {
         const municipality = municipalityByCode.get(barangay.municipalityCode)
@@ -90,17 +99,26 @@ export function getFullPath(code: string): FullPath | null {
 
 // ─── Fuzzy search helpers ────────────────────────────────────────────────────
 
-/** Dice's bigram coefficient — tolerates typos and partial matches */
-function bigramScore(a: string, b: string): number {
-    if (a === b) return 1
-    if (a.length < 2 || b.length < 2) return a.startsWith(b) || b.startsWith(a) ? 0.5 : 0
-
-    const bigrams = new Map<string, number>()
-    for (let i = 0; i < a.length - 1; i++) {
-        const bg = a.slice(i, i + 2)
-        bigrams.set(bg, (bigrams.get(bg) ?? 0) + 1)
+/** Build a bigram frequency map for a string. */
+function buildBigrams(s: string): Map<string, number> {
+    const m = new Map<string, number>()
+    for (let i = 0; i < s.length - 1; i++) {
+        const bg = s.slice(i, i + 2)
+        m.set(bg, (m.get(bg) ?? 0) + 1)
     }
+    return m
+}
 
+/**
+ * Dice's bigram coefficient using pre-computed query bigrams — tolerates typos.
+ * qBigrams must be built via buildBigrams(q) before the scoring loop so it is
+ * not re-allocated for every candidate in the dataset.
+ */
+function bigramScore(q: string, qBigrams: Map<string, number>, b: string): number {
+    if (q === b) return 1
+    if (q.length < 2 || b.length < 2) return q.startsWith(b) || b.startsWith(q) ? 0.5 : 0
+
+    const bigrams = new Map(qBigrams)
     let matches = 0
     for (let i = 0; i < b.length - 1; i++) {
         const bg = b.slice(i, i + 2)
@@ -110,19 +128,41 @@ function bigramScore(a: string, b: string): number {
             bigrams.set(bg, count - 1)
         }
     }
-
-    return (2.0 * matches) / (a.length - 1 + b.length - 1)
+    return (2.0 * matches) / (q.length - 1 + b.length - 1)
 }
 
 const FUZZY_THRESHOLD = 0.3
 
+/**
+ * Maximum query length accepted by search.
+ * Guards against DoS via O(n×m) bigram scoring on huge inputs.
+ */
+export const MAX_QUERY_LENGTH = 200
+
+/**
+ * Maximum results returned by search regardless of the caller-supplied limit.
+ * Prevents unbounded result slices from JS callers passing Infinity or MAX_SAFE_INTEGER.
+ */
+export const MAX_LIMIT = 1_000
+
 // ─── search() ────────────────────────────────────────────────────────────────
 
 export function search(query: string, options?: SearchOptions): SearchResult[] {
-    const q = query.toLowerCase().trim()
+    if (typeof query !== 'string') return []
+    const q = query.slice(0, MAX_QUERY_LENGTH).toLowerCase().trim()
     if (!q) return []
 
-    const { fuzzy = false, limit, types, parentCode } = options ?? {}
+    const { fuzzy = false, types, parentCode: _parentCode } = options ?? {}
+
+    // Reject non-string parentCode from JS callers
+    const parentCode = typeof _parentCode === 'string' ? _parentCode : undefined
+
+    // Clamp limit: reject NaN/Infinity from JS callers; cap at MAX_LIMIT
+    const rawLimit = options?.limit
+    const limit: number | undefined = rawLimit !== undefined
+        ? Math.min(Math.max(0, Number.isFinite(rawLimit) ? Math.floor(rawLimit) : MAX_LIMIT), MAX_LIMIT)
+        : undefined
+
     const includeAll = !types || types.length === 0
 
     // Resolve parentCode to a scoping level once
@@ -161,31 +201,38 @@ export function search(query: string, options?: SearchOptions): SearchResult[] {
     const results: SearchResult[] = []
     const threshold = fuzzy ? FUZZY_THRESHOLD : 1
 
+    // Pre-compute query bigrams once so bigramScore doesn't rebuild the Map per candidate.
+    const qBigrams = fuzzy ? buildBigrams(q) : undefined
+
     const score = (name: string): number => {
         const n = name.toLowerCase()
-        return fuzzy ? bigramScore(q, n) : n.includes(q) ? 1 : 0
+        return fuzzy ? bigramScore(q, qBigrams!, n) : n.includes(q) ? 1 : 0
     }
 
     if (includeAll || types!.includes('region')) {
         for (const r of scopedRegions) {
+            if (!fuzzy && limit !== undefined && results.length >= limit) break
             const s = score(r.name)
             if (s >= threshold) results.push({ type: 'region', code: r.code, name: r.name, ...(fuzzy ? { score: s } : {}) })
         }
     }
     if (includeAll || types!.includes('province')) {
         for (const p of scopedProvinces) {
+            if (!fuzzy && limit !== undefined && results.length >= limit) break
             const s = score(p.name)
             if (s >= threshold) results.push({ type: 'province', code: p.code, name: p.name, regionCode: p.regionCode, ...(fuzzy ? { score: s } : {}) })
         }
     }
     if (includeAll || types!.includes('municipality')) {
         for (const m of scopedMunicipalities) {
+            if (!fuzzy && limit !== undefined && results.length >= limit) break
             const s = score(m.name)
             if (s >= threshold) results.push({ type: 'municipality', code: m.code, name: m.name, regionCode: m.regionCode, provinceCode: m.provinceCode, ...(fuzzy ? { score: s } : {}) })
         }
     }
     if (includeAll || types!.includes('barangay')) {
         for (const b of scopedBarangays) {
+            if (!fuzzy && limit !== undefined && results.length >= limit) break
             const s = score(b.name)
             if (s >= threshold) results.push({ type: 'barangay', code: b.code, name: b.name, municipalityCode: b.municipalityCode, ...(fuzzy ? { score: s } : {}) })
         }

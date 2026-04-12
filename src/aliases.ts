@@ -89,7 +89,7 @@ const REGION_ALIASES: Record<string, string> = {
 
 /**
  * Resolves a common alias (region nickname, abbreviation, or number) to a SearchResult.
- * Returns null if the alias is not recognized.
+ * Returns null if the alias is not recognized or if the input is not a string.
  *
  * @example
  * resolveAlias('NCR')         // → { type: 'region', code: '130000000', ... }
@@ -97,10 +97,12 @@ const REGION_ALIASES: Record<string, string> = {
  * resolveAlias('BARMM')       // → { type: 'region', code: '150000000', ... }
  */
 export function resolveAlias(alias: string): SearchResult | null {
+    if (typeof alias !== 'string') return null
     const key = alias.toLowerCase().trim()
+    if (!key) return null
 
-    // Try region aliases first
-    const regionCode = REGION_ALIASES[key]
+    // Use hasOwnProperty to avoid prototype pollution via __proto__, constructor, etc.
+    const regionCode = Object.prototype.hasOwnProperty.call(REGION_ALIASES, key) ? REGION_ALIASES[key] : undefined
     if (regionCode !== undefined) {
         const region = regionByCode.get(regionCode)
         if (region) return { type: 'region', code: region.code, name: region.name }

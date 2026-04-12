@@ -1,16 +1,17 @@
-name: Publish Package
+name: CI
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
-  id-token: write  # Required for npm provenance publishing
 
 jobs:
-  publish:
+  ci:
+    name: Build, typecheck, test
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +22,6 @@ jobs:
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
-          registry-url: 'https://registry.npmjs.org'
           cache: npm
 
       - name: Install dependencies
@@ -36,13 +36,5 @@ jobs:
       - name: Audit dependencies
         run: npm audit --audit-level=high
 
-      - name: Build
-        run: npm run build
-
-      - name: Dry-run pack
+      - name: Dry-run pack (verify published files)
         run: npm pack --dry-run
-
-      - name: Publish with provenance
-        run: npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -40,6 +40,17 @@ const LOCAL_XLSX_FILE = path.resolve(
 
 const OUTPUT_FILE = path.resolve(process.cwd(), 'src/data/psgc.json')
 
+/** Minimum expected record counts — fail-fast if the dataset looks truncated or corrupted. */
+const MIN_EXPECTED = {
+    regions: 17,
+    provinces: 80,
+    municipalities: 1_400,
+    barangays: 40_000,
+}
+
+/** Maximum tolerated malformed rows before aborting (as a safety valve). */
+const MAX_MALFORMED_ROWS = 500
+
 function clean(value: unknown): string {
     return String(value ?? '')
         .replace(/\s+/g, ' ')
@@ -53,6 +64,11 @@ function digitsOnly(value: unknown): string {
 function padPsgc(code: unknown): string {
     const digits = digitsOnly(code)
     return digits ? digits.padStart(9, '0') : ''
+}
+
+/** Returns true if the string is a valid 9-digit PSGC code. */
+function isValidPsgcCode(code: string): boolean {
+    return /^\d{9}$/.test(code)
 }
 
 function normalizeLevel(value: unknown): string {
@@ -164,6 +180,10 @@ async function main(): Promise<void> {
     const municipalities: Municipality[] = []
     const barangays: Barangay[] = []
 
+    // Track seen codes to detect duplicates
+    const seenCodes = new Set<string>()
+    let malformedRows = 0
+
     for (const row of rows) {
         const code = padPsgc(
             pick(row, [
@@ -191,7 +211,31 @@ async function main(): Promise<void> {
             ])
         )
 
-        if (!code || !name || !level) continue
+        // Validate required fields — skip and count malformed rows
+        if (!code || !name || !level) {
+            malformedRows++
+            if (malformedRows > MAX_MALFORMED_ROWS) {
+                throw new Error(
+                    `Too many malformed rows (${malformedRows}). ` +
+                    `The PSGC file may be corrupted or the header detection failed.`
+                )
+            }
+            continue
+        }
+
+        // Validate PSGC code format (must be exactly 9 digits)
+        if (!isValidPsgcCode(code)) {
+            console.warn(`Skipping row with invalid PSGC code: "${code}" (name: "${name}")`)
+            malformedRows++
+            continue
+        }
+
+        // Detect duplicate codes
+        if (seenCodes.has(code)) {
+            console.warn(`Duplicate PSGC code detected: "${code}" (name: "${name}") — skipping`)
+            continue
+        }
+        seenCodes.add(code)
 
         const regionCode =
             padPsgc(
@@ -252,6 +296,20 @@ async function main(): Promise<void> {
         }
     }
 
+    // Fail-fast if counts are below expected minimums
+    if (regions.length < MIN_EXPECTED.regions) {
+        throw new Error(`Too few regions: got ${regions.length}, expected at least ${MIN_EXPECTED.regions}`)
+    }
+    if (provinces.length < MIN_EXPECTED.provinces) {
+        throw new Error(`Too few provinces: got ${provinces.length}, expected at least ${MIN_EXPECTED.provinces}`)
+    }
+    if (municipalities.length < MIN_EXPECTED.municipalities) {
+        throw new Error(`Too few municipalities: got ${municipalities.length}, expected at least ${MIN_EXPECTED.municipalities}`)
+    }
+    if (barangays.length < MIN_EXPECTED.barangays) {
+        throw new Error(`Too few barangays: got ${barangays.length}, expected at least ${MIN_EXPECTED.barangays}`)
+    }
+
     const output = {
         regions,
         provinces,
@@ -267,6 +325,9 @@ async function main(): Promise<void> {
     console.log(`Provinces: ${provinces.length}`)
     console.log(`Municipalities: ${municipalities.length}`)
     console.log(`Barangays: ${barangays.length}`)
+    if (malformedRows > 0) {
+        console.warn(`Warning: ${malformedRows} malformed rows were skipped`)
+    }
 }
 
 void main().catch((error: unknown) => {

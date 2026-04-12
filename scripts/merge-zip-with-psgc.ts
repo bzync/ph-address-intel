@@ -197,7 +197,8 @@ function normalizeName(name: string): string {
 
 function applyAlias(name: string): string {
     const normalized = normalizeName(name)
-    return MANUAL_ALIASES[normalized] ?? normalized
+    // Use hasOwnProperty to avoid prototype pollution via specially crafted names
+    return Object.prototype.hasOwnProperty.call(MANUAL_ALIASES, normalized) ? MANUAL_ALIASES[normalized]! : normalized
 }
 
 function buildMunicipalityIndex(municipalities: Municipality[]): Map<string, Municipality[]> {
@@ -224,9 +225,47 @@ function buildMunicipalityIndex(municipalities: Municipality[]): Map<string, Mun
     return index
 }
 
-async function readJson<T>(filePath: string): Promise<T> {
+/**
+ * Validates the shape of a parsed PSGC JSON object.
+ * Throws if any required array is missing or empty.
+ */
+function validatePsgcSchema(data: unknown): asserts data is PSGCData {
+    if (typeof data !== 'object' || data === null) {
+        throw new Error('psgc.json is not a valid JSON object')
+    }
+    const d = data as Record<string, unknown>
+    for (const key of ['regions', 'provinces', 'municipalities', 'barangays'] as const) {
+        if (!Array.isArray(d[key])) {
+            throw new Error(`psgc.json is missing required array: "${key}"`)
+        }
+        if ((d[key] as unknown[]).length === 0) {
+            throw new Error(`psgc.json has empty array for "${key}" — possible corruption`)
+        }
+    }
+}
+
+/**
+ * Validates the shape of a parsed ZIP JSON map.
+ * Throws if the object is invalid or if any key is not a 4-digit ZIP code.
+ */
+function validateZipSchema(data: unknown): asserts data is ZipRawMap {
+    if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        throw new Error('zip.json is not a valid JSON object')
+    }
+    const d = data as Record<string, unknown>
+    for (const [key, val] of Object.entries(d)) {
+        if (!/^\d{4}$/.test(key)) {
+            throw new Error(`zip.json contains invalid ZIP key: "${key}" (must be 4 digits)`)
+        }
+        if (!Array.isArray(val) || val.some((v) => typeof v !== 'string')) {
+            throw new Error(`zip.json entry for "${key}" must be an array of strings`)
+        }
+    }
+}
+
+async function readJson(filePath: string): Promise<unknown> {
     const content = await fs.readFile(filePath, 'utf8')
-    return JSON.parse(content) as T
+    return JSON.parse(content) as unknown
 }
 
 async function writeJson(filePath: string, data: unknown): Promise<void> {
@@ -235,8 +274,13 @@ async function writeJson(filePath: string, data: unknown): Promise<void> {
 }
 
 async function main(): Promise<void> {
-    const psgc = await readJson<PSGCData>(PSGC_FILE)
-    const zipMap = await readJson<ZipRawMap>(ZIP_FILE)
+    const rawPsgc = await readJson(PSGC_FILE)
+    validatePsgcSchema(rawPsgc)
+    const psgc: PSGCData = rawPsgc
+
+    const rawZip = await readJson(ZIP_FILE)
+    validateZipSchema(rawZip)
+    const zipMap: ZipRawMap = rawZip
 
     const municipalityIndex = buildMunicipalityIndex(psgc.municipalities)
 

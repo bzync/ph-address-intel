@@ -312,6 +312,45 @@ Example:
 
 ---
 
+## Security
+
+### Threat model
+
+This is a **pure offline library** — it makes no network calls, stores no state, and processes only string inputs. The bundled data is read-only and derived from official Philippine government sources (PSA PSGC, PHLPost).
+
+Primary risks are input-driven: adversarial strings passed to `search()` or validation functions from untrusted callers.
+
+### Input safety
+
+All public API functions apply runtime type guards and reject non-string inputs gracefully (return `null`, `undefined`, or `[]`). Key limits enforced by the library:
+
+| Protection | Detail |
+|---|---|
+| Query length cap | `search()` silently truncates inputs to 200 characters |
+| Result limit cap | `search({ limit })` is clamped to a maximum of 1,000 results |
+| ZIP format validation | `lookupByZip()` rejects any input that is not exactly 4 decimal digits |
+| Error message sanitization | `validate()` truncates codes in error messages to 20 characters |
+| Prototype pollution guard | Alias and ZIP lookups use `Object.hasOwn()` |
+
+### Data provenance
+
+- **PSGC data** — from the Philippine Statistics Authority (PSA), Q4 2025 publication
+- **ZIP codes** — from PHLPost (`https://phlpost.gov.ph/zip-code-locator/`), fetched over HTTPS with a 30-second timeout and a 5 MB response size cap
+
+### Release integrity
+
+Releases are published with [npm provenance attestations](https://docs.npmjs.com/generating-provenance-statements). Verify a release with:
+
+```bash
+npm audit signatures
+```
+
+### Reporting vulnerabilities
+
+Please use [GitHub Security Advisories](https://github.com/bzync/ph-address-intel/security/advisories/new) — do not open public issues for security reports. See [SECURITY.md](SECURITY.md) for full policy and SLA.
+
+---
+
 ## License
 
 MIT License © 2026
