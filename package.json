@@ -64,7 +64,7 @@
         "generate:psgc-data": "tsx scripts/fetch-psgc.ts",
         "generate:zip-data": "tsx scripts/fetch-zip.ts",
         "generate:merge-data": "tsx scripts/merge-zip-with-psgc.ts",
-        "release": "npm version patch && git push --follow-tags && npm publish"
+        "release:patch": "npm version patch && git push --follow-tags && npm publish --access public --provenance=false"
     },
     "devDependencies": {
         "@types/node": "^25.5.2",
