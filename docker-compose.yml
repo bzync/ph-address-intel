@@ -8,11 +8,11 @@ services:
       - "8091:80"
     restart: unless-stopped
     networks:
-      - ph_address_intel_net
-      - proxy_manager_net
+      - ph-address-intel-network
+      - proxy-network
 
 networks:
-  ph_address_intel_net: 
-  proxy_manager_net:
+  ph-address-intel-network: 
+  proxy-network:
     external: true
 

@@ -63,7 +63,8 @@
         "typecheck": "tsc --noEmit",
         "generate:psgc-data": "tsx scripts/fetch-psgc.ts",
         "generate:zip-data": "tsx scripts/fetch-zip.ts",
-        "generate:merge-data": "tsx scripts/merge-zip-with-psgc.ts"
+        "generate:merge-data": "tsx scripts/merge-zip-with-psgc.ts",
+        "release": "npm version patch && git push --follow-tags && npm publish"
     },
     "devDependencies": {
         "@types/node": "^25.5.2",

@@ -8,5 +8,8 @@ export default defineConfig({
     clean: true,
     minify: false,
     treeshake: true,
-    target: 'es2020'
+    target: 'es2020',
+    outExtension({ format }: { format: string }) {
+        return { js: format === 'esm' ? '.mjs' : '.cjs' }
+    },
 })

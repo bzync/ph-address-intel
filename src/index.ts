@@ -21,6 +21,8 @@ export {
     getBarangay,
     getFullPath,
     search,
+    MAX_QUERY_LENGTH,
+    MAX_LIMIT,
 } from './lookup'
 export { lookupByZip } from './zip'
 export { resolveAlias } from './aliases'
