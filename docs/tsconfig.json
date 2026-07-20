@@ -10,10 +10,7 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
-    "paths": {
-      "@bzync/ph-address-intel": ["../src/index.ts"]
-    }
+    "strict": true
   },
-  "include": ["src", "../src"]
+  "include": ["src"]
 }
